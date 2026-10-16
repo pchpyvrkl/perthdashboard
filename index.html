@@ -320,6 +320,9 @@
                         <p id="user-greeting" class="text-xs uppercase tracking-wider text-terminalText">Good Morning, PONGSAKORN!</p>
                     </div>
                     <div class="flex items-center gap-4 text-[10px] text-terminalMuted">
+                        <button onclick="toggleFullscreen()" class="text-terminalAmber hover:text-terminalText transition-colors" title="Toggle Fullscreen">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
                         <span id="bangkok-text">BKK: --:-- (UTC+7)</span>
                         <span class="text-terminalAmber">●</span>
                         <span>LIVE DATA</span>
@@ -918,6 +921,18 @@
                 if (pinEntry.length === 0) return;
                 pinEntry = pinEntry.slice(0, -1);
                 updatePinDots();
+            }
+
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
             }
 
             function updatePinDots(state) {
