@@ -20,12 +20,18 @@
                 theme: {
                     extend: {
                         colors: {
-                            darkBg: '#000000',
-                            darkCard: '#09090b',
-                            accentGreen: '#10b981',
-                            accentRed: '#ef4444',
-                            accentBlue: '#3b82f6',
-                            purple: { 400: '#a78bfa', 500: '#8b5cf6' }
+                            // Bloomberg Terminal Vintage Palette
+                            terminalBlack: '#000000',
+                            terminalDark: '#080808',
+                            terminalPanel: '#101010',
+                            terminalBorder: '#383838',
+                            terminalText: '#D6D6D6',
+                            terminalMuted: '#858585',
+                            terminalAmber: '#FFB000',
+                            terminalGreen: '#00C853',
+                            terminalRed: '#FF4545',
+                            terminalCyan: '#00D5E8',
+                            terminalHighlight: '#E6A23C'
                         }
                     }
                 }
@@ -36,29 +42,35 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
         <style>
             html,body{height:100%;}
             body{
               background: #000000;
-              color: #f4f4f5;
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              color: #D6D6D6;
+              font-family: 'JetBrains Mono', 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+              font-variant-numeric: tabular-nums;
               overflow:hidden;
               -webkit-font-smoothing:antialiased;
               margin:0;
               padding:0;
+              font-size: 12px;
+              line-height: 1.4;
             }
-            ::-webkit-scrollbar { width: 6px; height: 6px; }
-            ::-webkit-scrollbar-track { background: #000000; }
-            ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
-            ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-            
+            ::-webkit-scrollbar { width: 8px; height: 8px; }
+            ::-webkit-scrollbar-track { background: #080808; }
+            ::-webkit-scrollbar-thumb { background: #383838; border-radius: 0; }
+            ::-webkit-scrollbar-thumb:hover { background: #585858; }
+
             button{ font-family:inherit; cursor:pointer; }
-            :focus-visible{ outline:2px solid #10b981; outline-offset:2px; }
+            :focus-visible{ outline:1px solid #FFB000; outline-offset:1px; }
             @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
 
-            .heatmap-cell { padding: .5rem .25rem; text-align:center; border-right:1px solid #18181b; font-size:10px; font-weight:900; background:#000; }
-            .h-pos-1,.h-pos-2,.h-pos-3,.h-pos-4 { color:#10b981; }
-            .h-neg-1,.h-neg-2,.h-neg-3,.h-neg-4 { color:#ef4444; }
+            .heatmap-cell { padding: .5rem .25rem; text-align:center; border-right:1px solid #383838; font-size:10px; font-weight:900; background:#000; }
+            .h-pos-1,.h-pos-2,.h-pos-3,.h-pos-4 { color:#00C853; }
+            .h-neg-1,.h-neg-2,.h-neg-3,.h-neg-4 { color:#FF4545; }
             .heatmap-row:hover .heatmap-cell:not(.heatmap-year):not(.heatmap-annual) { filter: brightness(1.2); }
 
             .open-trades-table { table-layout: auto; width: 100%; min-width: 900px; }
@@ -72,20 +84,19 @@
             .open-trades-table .col-holding { min-width: 100px; }
 
             .monthly-table { table-layout: fixed; width: 100%; border-spacing: 0; min-width: 1000px; }
-            .monthly-table th { padding: .6rem .25rem; font-size:10px; font-weight:900; text-transform:uppercase; color:#52525b; border-bottom:1px solid #18181b; text-align:right; font-variant-numeric: tabular-nums; }
-            .monthly-table td { padding: .6rem .25rem; font-size:11px; border-bottom:1px solid #18181b80; color:#a1a1aa; text-align:right; font-variant-numeric: tabular-nums; }
+            .monthly-table th { padding: .6rem .25rem; font-size:10px; font-weight:900; text-transform:uppercase; color:#858585; border-bottom:1px solid #383838; text-align:right; font-variant-numeric: tabular-nums; }
+            .monthly-table td { padding: .6rem .25rem; font-size:11px; border-bottom:1px solid #383838; color:#D6D6D6; text-align:right; font-variant-numeric: tabular-nums; }
             .monthly-table th:first-child, .monthly-table td:first-child { text-align:left; width:60px; }
             .monthly-table th:last-child, .monthly-table td:last-child { width:100px; }
 
-            .metric-card { background: rgba(24,24,27,0.4); border:1px solid #18181b; border-radius: 0.75rem; padding: 0.75rem; transition: all .3s ease; }
-            @media(min-width:640px){ .metric-card { padding: 1rem; } }
-            .metric-card:hover { background: rgba(255,255,255,0.03); border-color:#3f3f46; }
-            .metric-label { font-size:10px; text-transform:uppercase; letter-spacing:.15em; color:#71717a; font-weight:700; margin-bottom:.25rem; }
-            .metric-value { font-size:1.25rem; font-weight:900; }
-            @media(min-width:640px){ .metric-value { font-size:1.5rem; } }
-            .val-pos { color:#10b981; }
-            .val-neg { color:#ef4444; }
-            .val-neutral { color:#a1a1aa; }
+            .metric-card { padding: 0.25rem 0.5rem; transition: all .2s ease; }
+            .metric-card:hover { background: #101010; }
+            .metric-label { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:#858585; font-weight:700; margin-bottom:0.1rem; }
+            .metric-value { font-size:1.1rem; font-weight:900; font-variant-numeric: tabular-nums; }
+            @media(min-width:640px){ .metric-value { font-size:1.2rem; } }
+            .val-pos { color:#00C853; }
+            .val-neg { color:#FF4545; }
+            .val-neutral { color:#858585; }
 
             .chart-label {
                 position: absolute;
@@ -96,11 +107,13 @@
                 z-index: 10;
                 text-shadow: 0 1px 2px rgba(0,0,0,0.8);
                 white-space: nowrap;
+                font-family: 'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
             }
 
             #table-tooltip {
-                position: fixed; pointer-events:none; background: rgba(9,9,11,0.97); border:1px solid #27272a;
-                padding:12px 14px; border-radius:8px; z-index:10000; display:none; box-shadow: 0 20px 40px rgba(0,0,0,.5);
+                position: fixed; pointer-events:none; background: #080808; border:1px solid #383838;
+                padding:12px 14px; z-index:10000; display:none;
+                font-family: 'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
             }
 
             /* Live pulsing dot on the tail of the equity chart */
@@ -116,7 +129,7 @@
             /* ── PIN LOCK SCREEN ─────────────────────────────── */
             #pin-overlay {
                 position: fixed; inset: 0; z-index: 99999;
-                background: #000;
+                background: #000000;
                 display: flex; flex-direction: column;
                 align-items: center; justify-content: center;
                 gap: 0;
@@ -126,23 +139,23 @@
 
             .pin-dot {
                 width: 14px; height: 14px; border-radius: 9999px;
-                border: 2px solid #3f3f46;
+                border: 2px solid #383838;
                 transition: background .15s ease, border-color .15s ease, transform .15s ease;
             }
-            .pin-dot.filled { background: #f4f4f5; border-color: #f4f4f5; transform: scale(1.15); }
-            .pin-dot.error  { background: #ef4444; border-color: #ef4444; }
-            .pin-dot.success{ background: #10b981; border-color: #10b981; }
+            .pin-dot.filled { background: #FFB000; border-color: #FFB000; transform: scale(1.15); }
+            .pin-dot.error  { background: #FF4545; border-color: #FF4545; }
+            .pin-dot.success{ background: #00C853; border-color: #00C853; }
 
             .pin-key {
                 width: 72px; height: 72px; border-radius: 9999px;
-                background: rgba(255,255,255,0.04); border: 1px solid #27272a;
-                color: #f4f4f5; font-size: 1.25rem; font-weight: 900;
+                background: #080808; border: 1px solid #383838;
+                color: #D6D6D6; font-size: 1.25rem; font-weight: 900;
                 display: flex; align-items: center; justify-content: center;
                 cursor: pointer; transition: background .15s ease, transform .1s ease;
                 -webkit-tap-highlight-color: transparent; user-select: none;
             }
-            .pin-key:active { background: rgba(255,255,255,0.12); transform: scale(0.93); }
-            .pin-key.del { color: #71717a; font-size: .9rem; }
+            .pin-key:active { background: #101010; transform: scale(0.93); }
+            .pin-key.del { color: #858585; font-size: .9rem; }
 
             @keyframes pinShake {
                 0%,100%{ transform:translateX(0); }
@@ -172,28 +185,26 @@
             gap: 12px;
             width: 100%;
             padding: 12px 16px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid #27272a;
-            border-radius: 8px;
+            background: #080808;
+            border: 1px solid #383838;
             cursor: pointer;
             transition: all .2s ease;
         }
 
         .checkbox-item:hover {
-            background: rgba(255,255,255,0.05);
-            border-color: #3f3f46;
+            background: #101010;
+            border-color: #FFB000;
         }
 
         .checkbox-item.checked {
-            background: rgba(16,185,129,0.1);
-            border-color: #10b981;
+            background: #080808;
+            border-color: #00C853;
         }
 
         .checkbox-custom {
             width: 20px;
             height: 20px;
-            border: 2px solid #3f3f46;
-            border-radius: 4px;
+            border: 2px solid #383838;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -202,8 +213,8 @@
         }
 
         .checkbox-item.checked .checkbox-custom {
-            background: #10b981;
-            border-color: #10b981;
+            background: #00C853;
+            border-color: #00C853;
         }
 
         .checkbox-custom::after {
@@ -221,40 +232,39 @@
 
         .checkbox-label {
             font-size: 11px;
-            color: #a1a1aa;
+            color: #858585;
             letter-spacing: 0.02em;
             line-height: 1.4;
         }
 
         .checkbox-item.checked .checkbox-label {
-            color: #f4f4f5;
+            color: #D6D6D6;
         }
 
         #checkbox-continue-btn {
             margin-top: 16px;
             padding: 12px 32px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid #27272a;
-            color: #52525b;
+            background: #080808;
+            border: 1px solid #383838;
+            color: #858585;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            border-radius: 9999px;
             cursor: not-allowed;
             transition: all .3s ease;
         }
 
         #checkbox-continue-btn.active {
-            background: #10b981;
-            border-color: #10b981;
+            background: #00C853;
+            border-color: #00C853;
             color: #000;
             cursor: pointer;
         }
 
         #checkbox-continue-btn.active:hover {
-            background: #059669;
-            border-color: #059669;
+            background: #00A643;
+            border-color: #00A643;
         }
 
         @keyframes fadeIn {
@@ -269,7 +279,7 @@
         </style>
     </head>
 
-    <body class="bg-darkBg text-slate-100 font-sans min-h-screen" style="margin:0; padding:0;">
+    <body class="bg-terminalBlack text-terminalText font-mono min-h-screen" style="margin:0; padding:0;">
         <!-- PIN LOCK SCREEN / WELCOME COVER -->
         <div id="pin-overlay">
 
@@ -287,7 +297,7 @@
                 <div id="pin-brand" style="text-align:center;margin-bottom:32px;">
                     <p style="font-size:8px;text-transform:uppercase;letter-spacing:.55em;color:#3f3f46;font-weight:900;margin-bottom:10px;">Quantitative Portfolio Auditor</p>
                     <h1 style="font-size:clamp(2.4rem,8vw,4.5rem);font-weight:900;letter-spacing:-.05em;color:#f4f4f5;line-height:.95;margin:0;">ROWRIC</h1>
-                    <div style="width:40px;height:2px;background:linear-gradient(90deg,transparent,#10b981,transparent);margin:12px auto 0;"></div>
+                    <div style="width:40px;height:2px;background:linear-gradient(90deg,transparent,#FFB000,transparent);margin:12px auto 0;"></div>
                     <p style="font-size:8px;text-transform:uppercase;letter-spacing:.35em;color:#52525b;margin-top:10px;">Live Portfolio Auditor</p>
                 </div>
 
@@ -369,58 +379,58 @@
 
         <main id="main-content" class="max-w-7xl mx-auto px-3 py-6 sm:px-4 sm:py-12 space-y-4 sm:space-y-6" style="display: none; overflow-y: auto; height: 100vh;">
 
-            <!-- Header / World Clocks -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-2 shadow-sm flex flex-col gap-2">
-                <div class="flex flex-col items-center text-center gap-0.5 pt-1">
-                    <p id="user-greeting" class="text-sm uppercase tracking-[0.35em] text-amber-300 font-semibold">Good Morning, PONGSAKORN!</p>
-                    <p id="bangkok-text" class="text-[10px] text-slate-400">Bangkok: --:-- (UTC+7)</p>
+            <!-- Terminal Header -->
+            <div class="bg-terminalDark border-b border-terminalBorder p-2 flex flex-col gap-1">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <p class="text-xs font-bold uppercase tracking-widest text-terminalAmber">ROWRIC QUANTITATIVE PORTFOLIO AUDITOR</p>
+                        <span class="text-[10px] text-terminalMuted">|</span>
+                        <p id="user-greeting" class="text-xs uppercase tracking-wider text-terminalText">Good Morning, PONGSAKORN!</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-[10px] text-terminalMuted">
+                        <span id="bangkok-text">BKK: --:-- (UTC+7)</span>
+                        <span class="text-terminalAmber">●</span>
+                        <span>LIVE DATA</span>
+                    </div>
                 </div>
-                <div class="flex flex-row flex-nowrap justify-center gap-1 mt-1 overflow-x-auto pb-1">
-                    <div class="h-16 w-20 sm:h-20 sm:w-24 min-w-[5rem] sm:min-w-[6rem] rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2 text-center flex flex-col justify-center items-center">
-                        <div class="flex items-center justify-center gap-1"><span class="text-[8px] uppercase tracking-[0.2em] text-slate-500">New York</span><i id="ny-icon" class="fa-solid fa-sun text-amber-400 text-[9px]"></i></div>
-                        <p id="ny-clock" class="mt-1 text-base font-black text-slate-100">--:--</p>
-                        <p id="ny-offset" class="mt-1 text-[8px] text-slate-500">UTC</p>
+                <div class="flex justify-between items-center border-t border-terminalBorder pt-1">
+                    <div class="flex items-center gap-6 text-[10px]">
+                        <span class="text-terminalMuted">MARKETS:</span>
+                        <span class="text-terminalText"><span id="ny-clock">--:--</span> <span class="text-terminalMuted">NY</span></span>
+                        <span class="text-terminalText"><span id="london-clock">--:--</span> <span class="text-terminalMuted">LDN</span></span>
+                        <span class="text-terminalText"><span id="sydney-clock">--:--</span> <span class="text-terminalMuted">SYD</span></span>
+                        <span class="text-terminalText"><span id="tokyo-clock">--:--</span> <span class="text-terminalMuted">TKY</span></span>
                     </div>
-                    <div class="h-16 w-20 sm:h-20 sm:w-24 min-w-[5rem] sm:min-w-[6rem] rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2 text-center flex flex-col justify-center items-center">
-                        <div class="flex items-center justify-center gap-1"><span class="text-[8px] uppercase tracking-[0.2em] text-slate-500">London</span><i id="london-icon" class="fa-solid fa-sun text-amber-400 text-[9px]"></i></div>
-                        <p id="london-clock" class="mt-1 text-base font-black text-slate-100">--:--</p>
-                        <p id="london-offset" class="mt-1 text-[8px] text-slate-500">UTC</p>
-                    </div>
-                    <div class="h-16 w-20 sm:h-20 sm:w-24 min-w-[5rem] sm:min-w-[6rem] rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2 text-center flex flex-col justify-center items-center">
-                        <div class="flex items-center justify-center gap-1"><span class="text-[8px] uppercase tracking-[0.2em] text-slate-500">Sydney</span><i id="sydney-icon" class="fa-solid fa-sun text-amber-400 text-[9px]"></i></div>
-                        <p id="sydney-clock" class="mt-1 text-base font-black text-slate-100">--:--</p>
-                        <p id="sydney-offset" class="mt-1 text-[8px] text-slate-500">UTC</p>
-                    </div>
-                    <div class="h-16 w-20 sm:h-20 sm:w-24 min-w-[5rem] sm:min-w-[6rem] rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2 text-center flex flex-col justify-center items-center">
-                        <div class="flex items-center justify-center gap-1"><span class="text-[8px] uppercase tracking-[0.2em] text-slate-500">Tokyo</span><i id="tokyo-icon" class="fa-solid fa-sun text-amber-400 text-[9px]"></i></div>
-                        <p id="tokyo-clock" class="mt-1 text-base font-black text-slate-100">--:--</p>
-                        <p id="tokyo-offset" class="mt-1 text-[8px] text-slate-500">UTC</p>
+                    <div class="text-[10px] text-terminalMuted uppercase tracking-wider">
+                        SESSION: <span class="text-terminalAmber">ACTIVE</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Date Range Filter -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-3 shadow-sm">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-days text-zinc-500 text-sm"></i>
-                        <span class="text-xs font-black uppercase text-zinc-500 tracking-[0.3em]">Date Range Filter</span>
+            <!-- Terminal Navigation & Date Filter -->
+            <div class="bg-terminalDark border-b border-terminalBorder p-2">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider">
+                        <span class="text-terminalAmber font-bold">CMD:</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="clearDateFilter()">OVERVIEW</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">PORTFOLIO</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">PERFORMANCE</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">EXPOSURE</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">RISK</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">MARKETS</span>
                     </div>
-                    <div class="flex flex-col sm:flex-row items-center gap-2 flex-wrap">
-                        <div class="flex items-center gap-2">
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-wider">From:</label>
-                            <input type="text" id="date-from" placeholder="dd.mm.yyyy" class="bg-black border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500" style="width: 120px;">
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-wider">To:</label>
-                            <input type="text" id="date-to" placeholder="dd.mm.yyyy" class="bg-black border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500" style="width: 120px;">
-                        </div>
-                        <button onclick="applyDateFilter()" class="px-3 py-1 text-xs rounded font-bold transition-all bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-filter text-[9px]"></i> Apply Filter
-                        </button>
-                        <button onclick="clearDateFilter()" class="px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white hover:bg-zinc-600 flex items-center gap-1.5">
-                            <i class="fa-solid fa-times text-[9px]"></i> Clear
-                        </button>
+                    <div class="flex items-center gap-2 text-[10px]">
+                        <span class="text-terminalMuted uppercase">DATE RANGE:</span>
+                        <input type="text" id="date-from" placeholder="dd.mm.yyyy" class="bg-terminalBlack border border-terminalBorder px-2 py-1 text-terminalText focus:outline-none focus:border-terminalAmber w-24 font-mono">
+                        <span class="text-terminalMuted">-</span>
+                        <input type="text" id="date-to" placeholder="dd.mm.yyyy" class="bg-terminalBlack border border-terminalBorder px-2 py-1 text-terminalText focus:outline-none focus:border-terminalAmber w-24 font-mono">
+                        <button onclick="applyDateFilter()" class="px-2 py-1 text-[10px] font-bold uppercase bg-terminalBlack border border-terminalBorder text-terminalAmber hover:border-terminalText hover:text-terminalText transition-all">APPLY</button>
+                        <button onclick="clearDateFilter()" class="px-2 py-1 text-[10px] font-bold uppercase bg-terminalBlack border border-terminalBorder text-terminalMuted hover:border-terminalText hover:text-terminalText transition-all">CLEAR</button>
                     </div>
                 </div>
             </div>
@@ -428,42 +438,42 @@
             <div id="capture-area" class="space-y-6">
 
             <!-- Top Metric Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[80px]">
-                    <p class="metric-label">Gain (TWR)</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1 border-b border-terminalBorder pb-2">
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">GAIN (TWR)</p>
                     <p id="metric-twr-gain" class="metric-value val-pos">--%</p>
                 </div>
-                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[80px]">
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
                     <div class="flex items-center justify-between w-full">
-                        <p class="metric-label">Net Profit</p>
-                        <button onclick="toggleFinancialPrivacy()" class="text-zinc-500 hover:text-zinc-300 transition-colors" title="Toggle visibility">
+                        <p class="metric-label">NET PROFIT</p>
+                        <button onclick="toggleFinancialPrivacy()" class="text-terminalMuted hover:text-terminalText transition-colors" title="Toggle visibility">
                             <i id="privacy-eye-icon" class="fa-solid fa-eye text-xs"></i>
                         </button>
                     </div>
                     <p id="metric-net-profit" class="metric-value val-neutral">$--</p>
                     <p id="metric-roi" class="hidden"></p>
                 </div>
-                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[80px]">
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
                     <div class="flex items-center justify-between w-full">
-                        <p class="metric-label">Balance</p>
+                        <p class="metric-label">BALANCE</p>
                     </div>
                     <p id="metric-balance" class="metric-value val-neutral">$--</p>
                     <p id="metric-deposits" class="hidden"></p>
                 </div>
-                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[80px]">
-                    <p class="metric-label">Max Drawdown</p>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">MAX DRAWDOWN</p>
                     <p id="metric-max-drawdown" class="metric-value val-neg">--%</p>
                 </div>
-                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[80px]">
-                    <p class="metric-label">Current Drawdown</p>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">CURRENT DD</p>
                     <p id="metric-current-drawdown" class="metric-value val-neg">--%</p>
                 </div>
-                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[80px]">
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
                     <div class="flex items-center gap-2">
-                        <p class="metric-label" style="margin-bottom:0">Unrealized P/L</p>
+                        <p class="metric-label" style="margin-bottom:0">UNREALIZED P/L</p>
                         <span class="flex h-1.5 w-1.5 relative">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminalGreen opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-terminalGreen"></span>
                         </span>
                     </div>
                     <p id="metric-unrealized-pl" class="metric-value val-neutral">$--</p>
@@ -471,179 +481,179 @@
             </div>
 
             <!-- Main Chart & Sidebar Analytics (toggles between Equity Chart and US News) -->
-            <div class="grid grid-cols-1 gap-6">
-                <div class="bg-darkCard border border-zinc-800 rounded-xl p-3 sm:p-4 shadow-xl flex flex-col justify-between">
-                    <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-terminalDark border border-terminalBorder p-3 flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
                         <div>
-                            <h4 id="main-view-title" class="text-xs font-black uppercase text-zinc-500 tracking-[0.3em]">Equity Curve & Portfolio Gain</h4>
+                            <h4 id="main-view-title" class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">EQUITY CURVE & PORTFOLIO GAIN</h4>
                         </div>
-                        <div class="flex gap-2 flex-wrap">
-                            <div class="flex gap-1 bg-black p-1 rounded-lg border border-zinc-800">
-                                <button onclick="switchMainView('chart')" id="btn-view-chart" class="px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-[10px]"></i> Chart</button>
-                                <button onclick="switchMainView('news')" id="btn-view-news" class="px-3 py-1 text-xs rounded font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1.5"><i class="fa-solid fa-flag-usa text-[10px]"></i> US News</button>
+                        <div class="flex gap-1 flex-wrap">
+                            <div class="flex gap-1 bg-terminalBlack p-1 border border-terminalBorder">
+                                <button onclick="switchMainView('chart')" id="btn-view-chart" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber">CHART</button>
+                                <button onclick="switchMainView('news')" id="btn-view-news" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">NEWS</button>
                             </div>
-                            <div id="chart-mode-controls" class="flex gap-2 flex-wrap">
-                                <div class="flex gap-1 bg-black p-1 rounded-lg border border-zinc-800">
-                                    <button onclick="changeChartType('gain')" id="btn-chart-gain" class="px-3 py-1 text-xs rounded font-bold transition-all bg-emerald-600 text-white shadow">Gain %</button>
-                                    <button onclick="changeChartType('balance')" id="btn-chart-balance" class="px-3 py-1 text-xs rounded font-bold transition-all text-slate-400 hover:text-slate-200">Balance $</button>
+                            <div id="chart-mode-controls" class="flex gap-1 flex-wrap">
+                                <div class="flex gap-1 bg-terminalBlack p-1 border border-terminalBorder">
+                                    <button onclick="changeChartType('gain')" id="btn-chart-gain" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalAmber text-terminalBlack">GAIN %</button>
+                                    <button onclick="changeChartType('balance')" id="btn-chart-balance" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">BAL $</button>
                                 </div>
-                                <div class="flex gap-1 bg-black p-1 rounded-lg border border-zinc-800">
-                                    <button onclick="changePeriodMode('trade')" id="btn-period-trade" class="px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white">Trade</button>
-                                    <button onclick="changePeriodMode('daily')" id="btn-period-daily" class="px-3 py-1 text-xs rounded font-bold transition-all text-slate-400 hover:text-slate-200">Daily</button>
-                                    <button onclick="changePeriodMode('monthly')" id="btn-period-monthly" class="px-3 py-1 text-xs rounded font-bold transition-all text-slate-400 hover:text-slate-200">Monthly</button>
-                                    <button onclick="changePeriodMode('yearly')" id="btn-period-yearly" class="px-3 py-1 text-xs rounded font-bold transition-all text-slate-400 hover:text-slate-200">Yearly</button>
+                                <div class="flex gap-1 bg-terminalBlack p-1 border border-terminalBorder">
+                                    <button onclick="changePeriodMode('trade')" id="btn-period-trade" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText">TRD</button>
+                                    <button onclick="changePeriodMode('daily')" id="btn-period-daily" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">DLY</button>
+                                    <button onclick="changePeriodMode('monthly')" id="btn-period-monthly" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">MTH</button>
+                                    <button onclick="changePeriodMode('yearly')" id="btn-period-yearly" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">YR</button>
                                 </div>
                             </div>
-                            <span id="news-updated-at" class="hidden text-[9px] text-zinc-600 uppercase tracking-widest self-center"></span>
+                            <span id="news-updated-at" class="hidden text-[9px] text-terminalMuted uppercase tracking-widest self-center"></span>
                         </div>
                     </div>
 
                     <!-- Chart view -->
                     <div id="main-chart-view">
-                        <div class="relative w-full h-[220px] sm:h-[300px]">
+                        <div class="relative w-full h-[220px] sm:h-[300px] bg-terminalBlack border border-terminalBorder">
                             <canvas id="equityChart"></canvas>
                             <div id="equity-live-dot">
                                 <span id="equity-live-dot-ping"></span>
                                 <span id="equity-live-dot-core"></span>
                             </div>
-                            <div id="highest-gain-label" class="chart-label text-emerald-400" style="display: none;">--%</div>
-                            <div id="lowest-gain-label" class="chart-label text-red-400" style="display: none;">--%</div>
+                            <div id="highest-gain-label" class="chart-label text-terminalGreen" style="display: none;">--%</div>
+                            <div id="lowest-gain-label" class="chart-label text-terminalRed" style="display: none;">--%</div>
                         </div>
-                        <div class="relative w-full h-[120px] sm:h-[140px] mt-3 sm:mt-4">
-                            <p class="text-[9px] font-black uppercase text-zinc-700 tracking-[0.3em] mb-1">Underwater Return Profile (%)</p>
-                            <div class="relative" style="height: 100%;">
+                        <div class="relative w-full h-[120px] sm:h-[140px] mt-2">
+                            <p class="text-[9px] font-black uppercase text-terminalMuted tracking-widest mb-1">UNDERWATER RETURN PROFILE (%)</p>
+                            <div class="relative bg-terminalBlack border border-terminalBorder" style="height: 100%;">
                                 <canvas id="drawdownChart" style="height: 100%;"></canvas>
-                                <div id="max-drawdown-label" class="chart-label text-red-400" style="display: none;">--%</div>
+                                <div id="max-drawdown-label" class="chart-label text-terminalRed" style="display: none;">--%</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- US News view (hidden until toggled) -->
                     <div id="main-news-view" class="hidden">
-                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest mb-3">Source: ForexFactory Weekly Calendar &middot; High Impact USD events only &middot; times shown 24hr UTC+7 &middot; auto-refreshes every 5 min</p>
+                        <p class="text-[9px] text-terminalMuted uppercase tracking-widest mb-3">Source: ForexFactory Weekly Calendar &middot; High Impact USD events only &middot; times shown 24hr UTC+7 &middot; auto-refreshes every 5 min</p>
                         <div id="news-calendar-list" class="space-y-2 h-[300px] sm:h-[400px] overflow-y-auto pr-1">
-                            <div class="text-center py-8 text-zinc-500 text-xs">Loading economic calendar…</div>
+                            <div class="text-center py-8 text-terminalMuted text-xs">Loading economic calendar…</div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Open Trades -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-3 sm:p-6 shadow-xl flex flex-col" style="overflow:hidden;">
-                <div class="flex justify-between items-center mb-3">
-                    <h4 class="text-xs font-black uppercase text-zinc-500 tracking-[0.3em]">Open Positions (Unrealized)</h4>
-                    <span id="open-trades-count" class="text-xs bg-amber-900/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/20">0 Active</span>
+            <div class="bg-terminalDark border border-terminalBorder p-3 flex flex-col" style="overflow:hidden;">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">OPEN POSITIONS (UNREALIZED)</h4>
+                    <span id="open-trades-count" class="text-[10px] text-terminalAmber border border-terminalAmber px-2 py-0.5">0 ACTIVE</span>
                 </div>
-                <div class="overflow-x-auto rounded-lg border border-zinc-800 flex-1 max-h-[300px]" style="-webkit-overflow-scrolling:touch;">
-                    <table class="open-trades-table w-full text-xs text-left text-slate-300">
-                        <thead class="text-slate-400 uppercase bg-black/80 sticky top-0 border-b border-zinc-800">
+                <div class="overflow-x-auto border border-terminalBorder flex-1 max-h-[300px]" style="-webkit-overflow-scrolling:touch;">
+                    <table class="open-trades-table w-full text-xs text-left text-terminalText">
+                        <thead class="text-terminalMuted uppercase bg-terminalBlack sticky top-0 border-b border-terminalBorder">
                             <tr>
-                                <th class="px-4 py-2.5 col-open-time">Open Time</th>
-                                <th class="px-4 py-2.5 col-symbol">Symbol</th>
-                                <th class="px-4 py-2.5 col-type">Type</th>
-                                <th class="px-4 py-2.5 text-right col-volume">Volume</th>
-                                <th class="px-4 py-2.5 text-right col-open-price">open</th>
+                                <th class="px-4 py-2.5 col-open-time">OPEN TIME</th>
+                                <th class="px-4 py-2.5 col-symbol">SYMBOL</th>
+                                <th class="px-4 py-2.5 col-type">TYPE</th>
+                                <th class="px-4 py-2.5 text-right col-volume">VOL</th>
+                                <th class="px-4 py-2.5 text-right col-open-price">OPEN</th>
                                 <th class="px-4 py-2.5 text-right col-tp">TP</th>
                                 <th class="px-4 py-2.5 text-right col-sl">SL</th>
-                                <th class="px-4 py-2.5 text-right col-current-price">current</th>
-                                <th class="px-4 py-2.5 text-right col-gain">Gain %</th>
+                                <th class="px-4 py-2.5 text-right col-current-price">CURR</th>
+                                <th class="px-4 py-2.5 text-right col-gain">GAIN %</th>
                                 <th class="px-4 py-2.5 text-right col-commission">COM</th>
-                                <th class="px-4 py-2.5 text-right col-swap">Swap</th>
-                                <th class="px-4 py-2.5 text-right col-profit">Profit</th>
-                                <th class="px-4 py-2.5 text-right col-holding">Holding</th>
+                                <th class="px-4 py-2.5 text-right col-swap">SWAP</th>
+                                <th class="px-4 py-2.5 text-right col-profit">PROFIT</th>
+                                <th class="px-4 py-2.5 text-right col-holding">HOLDING</th>
                             </tr>
                         </thead>
-                        <tbody id="open-transaction-rows" class="divide-y divide-zinc-800">
-                            <tr><td colspan="13" class="text-center py-8 text-slate-500">Connecting to Live Feed (Sheet 2)...</td></tr>
+                        <tbody id="open-transaction-rows" class="divide-y divide-terminalBorder">
+                            <tr><td colspan="13" class="text-center py-8 text-terminalMuted">CONNECTING TO LIVE FEED (SHEET 2)...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Transaction Log -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl flex flex-col">
-                <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
-                    <h4 class="text-xs font-black uppercase text-zinc-500 tracking-[0.3em]">Detailed Transactions History (By Close Date)</h4>
+            <div class="bg-terminalDark border border-terminalBorder p-4 flex flex-col">
+                <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
+                    <h4 class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">DETAILED TRANSACTIONS HISTORY (BY CLOSE DATE)</h4>
                     <div class="flex items-center gap-2">
-                        <span id="history-count" class="text-xs bg-zinc-800 text-slate-300 px-2 py-0.5 rounded-full">0 Entries</span>
-                        <button onclick="exportTransactionsPDF()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-[10px] uppercase tracking-widest font-black text-slate-300 hover:text-white transition-all">
-                            <i class="fa-solid fa-file-arrow-down text-[9px]"></i> Export PDF
+                        <span id="history-count" class="text-[10px] text-terminalText border border-terminalBorder px-2 py-0.5">0 ENTRIES</span>
+                        <button onclick="exportTransactionsPDF()" class="flex items-center gap-1.5 px-3 py-1.5 bg-terminalBlack border border-terminalBorder text-[10px] uppercase tracking-widest font-black text-terminalMuted hover:text-terminalText transition-all">
+                            <i class="fa-solid fa-file-arrow-down text-[9px]"></i> EXPORT PDF
                         </button>
                     </div>
                 </div>
-                <div class="overflow-x-auto rounded-lg border border-zinc-800 flex-1 max-h-[300px]">
-                    <table class="w-full text-xs text-left text-slate-300">
-                        <thead class="text-slate-400 uppercase bg-black/80 sticky top-0 border-b border-zinc-800">
+                <div class="overflow-x-auto border border-terminalBorder flex-1 max-h-[300px]">
+                    <table class="w-full text-xs text-left text-terminalText">
+                        <thead class="text-terminalMuted uppercase bg-terminalBlack sticky top-0 border-b border-terminalBorder">
                             <tr>
-                                <th class="px-4 py-2.5 text-left">In Time</th>
-                                <th class="px-4 py-2.5 text-left">Out Time</th>
-                                <th class="px-4 py-2.5 text-left">Symbol</th>
-                                <th class="px-2 py-2.5">Type</th>
-                                <th class="px-2 py-2.5 text-right">Volume</th>
-                                <th class="px-4 py-2.5 text-right">In Price</th>
-                                <th class="px-4 py-2.5 text-right">Out Price</th>
-                                <th class="px-4 py-2.5 text-right">Profit</th>
-                                <th class="px-4 py-2.5 text-right">Gain %</th>
+                                <th class="px-4 py-2.5 text-left">IN TIME</th>
+                                <th class="px-4 py-2.5 text-left">OUT TIME</th>
+                                <th class="px-4 py-2.5 text-left">SYMBOL</th>
+                                <th class="px-2 py-2.5">TYPE</th>
+                                <th class="px-2 py-2.5 text-right">VOL</th>
+                                <th class="px-4 py-2.5 text-right">IN PRICE</th>
+                                <th class="px-4 py-2.5 text-right">OUT PRICE</th>
+                                <th class="px-4 py-2.5 text-right">PROFIT</th>
+                                <th class="px-4 py-2.5 text-right">GAIN %</th>
                                 <th class="px-4 py-2.5 text-right">COM</th>
-                                <th class="px-4 py-2.5 text-right">Swap</th>
-                                <th class="px-4 py-2.5 text-right">Magic</th>
-                                <th class="px-4 py-2.5 text-right">Holding Time</th>
+                                <th class="px-4 py-2.5 text-right">SWAP</th>
+                                <th class="px-4 py-2.5 text-right">MAGIC</th>
+                                <th class="px-4 py-2.5 text-right">HOLDING</th>
                             </tr>
                         </thead>
-                        <tbody id="transaction-rows" class="divide-y divide-zinc-800">
-                            <tr><td colspan="13" class="text-center py-8 text-slate-500">Awaiting data fetch...</td></tr>
+                        <tbody id="transaction-rows" class="divide-y divide-terminalBorder">
+                            <tr><td colspan="13" class="text-center py-8 text-terminalMuted">AWAITING DATA FETCH...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Institution Risk & Return Analytics -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em]">Institution Risk & Return Analytics</h4>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div class="metric-card"><p class="metric-label">Annualized CAGR</p><p id="stat-cagr" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Avg. Monthly Gain</p><p id="stat-avg-monthly" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Avg. Daily Gain</p><p id="stat-avg-daily" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Annualized Sharpe</p><p id="stat-sharpe" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Annualized Sortino</p><p id="stat-sortino" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">MAR / Calmar</p><p id="stat-calmar" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Success Prob.</p><p id="stat-wr2" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Realized Vol (Ann.)</p><p id="stat-vol" class="metric-value">-</p></div>
+            <div class="bg-terminalDark border border-terminalBorder p-4">
+                <h4 class="text-[10px] font-black uppercase text-terminalMuted mb-4 tracking-widest">INSTITUTION RISK & RETURN ANALYTICS</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-1">
+                    <div class="metric-card"><p class="metric-label">ANNUALIZED CAGR</p><p id="stat-cagr" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">AVG. MONTHLY GAIN</p><p id="stat-avg-monthly" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">AVG. DAILY GAIN</p><p id="stat-avg-daily" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">ANNUALIZED SHARPE</p><p id="stat-sharpe" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">ANNUALIZED SORTINO</p><p id="stat-sortino" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">MAR / CALMAR</p><p id="stat-calmar" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">SUCCESS PROB.</p><p id="stat-wr2" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">REALIZED VOL (ANN.)</p><p id="stat-vol" class="metric-value">-</p></div>
                 </div>
             </div>
 
             <!-- Risk Assessment -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em]">Risk Assessment</h4>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <div class="metric-card"><p class="metric-label">Parametric VaR (95%)</p><p id="stat-var" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Profit Factor</p><p id="stat-pf" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Recovery Factor</p><p id="stat-rec" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Return Expectancy</p><p id="stat-expectancy" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Risk/Reward Profile</p><p id="stat-rr" class="metric-value">-</p></div>
-                    <div class="metric-card"><p class="metric-label">Alpha (vs Benchmark)</p><p id="stat-alpha" class="metric-value">-</p></div>
+            <div class="bg-terminalDark border border-terminalBorder p-4">
+                <h4 class="text-[10px] font-black uppercase text-terminalMuted mb-4 tracking-widest">RISK ASSESSMENT</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1">
+                    <div class="metric-card"><p class="metric-label">PARAMETRIC VAR (95%)</p><p id="stat-var" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">PROFIT FACTOR</p><p id="stat-pf" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">RECOVERY FACTOR</p><p id="stat-rec" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">RETURN EXPECTANCY</p><p id="stat-expectancy" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">RISK/REWARD PROFILE</p><p id="stat-rr" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">ALPHA (VS BENCHMARK)</p><p id="stat-alpha" class="metric-value">-</p></div>
                 </div>
-                <div class="flex items-center gap-6 mt-5 flex-wrap">
+                <div class="flex items-center gap-6 mt-4 flex-wrap">
                     <div class="flex items-center gap-2">
-                        <label class="text-[9px] text-zinc-600 uppercase tracking-widest font-bold whitespace-nowrap">US10Y / RFR %</label>
+                        <label class="text-[9px] text-terminalMuted uppercase tracking-widest font-bold whitespace-nowrap">US10Y / RFR %</label>
                         <input id="rfr-input" type="number" step="0.01" min="0" max="20"
-                            class="w-20 bg-zinc-900 border border-zinc-700 text-amber-300 text-xs font-bold rounded-md px-2 py-1 focus:outline-none focus:border-amber-400 text-center"
+                            class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 focus:outline-none focus:border-terminalAmber text-center font-mono"
                             onchange="updateRFR(this.value)" />
-                        <span class="text-[9px] text-zinc-600 uppercase tracking-widest">annual</span>
+                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">ANNUAL</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label class="text-[9px] text-zinc-600 uppercase tracking-widest font-bold whitespace-nowrap">Benchmark Return %</label>
+                        <label class="text-[9px] text-terminalMuted uppercase tracking-widest font-bold whitespace-nowrap">BENCHMARK RETURN %</label>
                         <input id="bmk-input" type="number" step="0.1" min="-50" max="100"
-                            class="w-20 bg-zinc-900 border border-zinc-700 text-amber-300 text-xs font-bold rounded-md px-2 py-1 focus:outline-none focus:border-amber-400 text-center"
+                            class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 focus:outline-none focus:border-terminalAmber text-center font-mono"
                             onchange="updateBenchmark(this.value)" />
-                        <span class="text-[9px] text-zinc-600 uppercase tracking-widest">annual</span>
+                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">ANNUAL</span>
                     </div>
-                    <p class="text-[9px] text-zinc-700 uppercase tracking-widest">Edit inputs then press Enter / Tab to recompute metrics</p>
+                    <p class="text-[9px] text-terminalMuted uppercase tracking-widest">EDIT INPUTS THEN PRESS ENTER / TAB TO RECOMPUTE METRICS</p>
                 </div>
             </div>
 
             <!-- Holding Period Distribution -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em]">Holding Period Distribution</h4>
+            <div class="bg-terminalDark border border-terminalBorder p-4">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Holding Period Distribution</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 items-center">
                     <div class="h-[220px] sm:h-[320px] relative"><canvas id="durationChart"></canvas></div>
                     <div class="grid grid-cols-2 gap-3">
@@ -656,17 +666,17 @@
             </div>
 
             <!-- Temporal Attribution -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl">
+            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
                 <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
-                    <h4 class="text-xs font-black uppercase text-zinc-500 tracking-[0.3em]">Temporal Return Attribution</h4>
-                    <p class="text-[10px] text-zinc-600 uppercase tracking-widest">Basis: Close Timestamp (Local Sheet Time)</p>
+                    <h4 class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em]">Temporal Return Attribution</h4>
+                    <p class="text-[10px] text-terminalMuted uppercase tracking-widest">Basis: Close Timestamp (Local Sheet Time)</p>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    <div class="bg-zinc-900/30 p-3 sm:p-4 rounded-xl border border-zinc-800/60 h-[240px] sm:h-[280px]">
+                    <div class="bg-zinc-900/30 p-3 sm:p-4  border border-terminalBorder/60 h-[240px] sm:h-[280px]">
                         <p class="metric-label mb-2">Intraday Periodicity (Cum. %)</p>
                         <div class="h-[170px] sm:h-[220px] relative"><canvas id="hourlyChart"></canvas></div>
                     </div>
-                    <div class="bg-zinc-900/30 p-3 sm:p-4 rounded-xl border border-zinc-800/60 h-[240px] sm:h-[280px]">
+                    <div class="bg-zinc-900/30 p-3 sm:p-4  border border-terminalBorder/60 h-[240px] sm:h-[280px]">
                         <p class="metric-label mb-2">Day-of-Week Periodicity (Cum. %)</p>
                         <div class="h-[170px] sm:h-[220px] relative"><canvas id="dailyPatternChart"></canvas></div>
                     </div>
@@ -674,19 +684,19 @@
             </div>
 
             <!-- Factor Attribution -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em]">Factor Type Attribution (Long / Short)</h4>
+            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Factor Type Attribution (Long / Short)</h4>
                 <div id="distribution-stats" class="flex justify-between items-end mb-4 sm:mb-6"></div>
                 <div class="h-[28px] relative w-full mb-8"><canvas id="attributionPieChart"></canvas></div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="border-b border-zinc-800">
-                                <th class="py-3 text-left text-zinc-500 uppercase tracking-widest font-black">Direction</th>
-                                <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">Exposure</th>
-                                <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">Profit Factor</th>
-                                <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">Success Rate</th>
-                                <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">Expected Return</th>
+                            <tr class="border-b border-terminalBorder">
+                                <th class="py-3 text-left text-terminalMuted uppercase tracking-widest font-black">Direction</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Exposure</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Profit Factor</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Success Rate</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Expected Return</th>
                             </tr>
                         </thead>
                         <tbody id="attribution-body"></tbody>
@@ -695,24 +705,24 @@
             </div>
 
             <!-- Risk of Ruin -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl overflow-hidden">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em]">Probability of Capital Depletion</h4>
+            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6  overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Probability of Capital Depletion</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="border-b border-zinc-800 text-center">
-                                    <th class="py-3 text-left text-zinc-500 uppercase tracking-widest font-black">Capital Loss</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">10%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">20%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">30%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">40%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">50%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">60%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">70%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">80%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">90%</th>
-                                    <th class="py-3 text-right text-zinc-500 uppercase tracking-widest font-black">100%</th>
+                                <tr class="border-b border-terminalBorder text-center">
+                                    <th class="py-3 text-left text-terminalMuted uppercase tracking-widest font-black">Capital Loss</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">10%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">20%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">30%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">40%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">50%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">60%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">70%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">80%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">90%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">100%</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -732,10 +742,10 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="bg-zinc-900/30 p-4 rounded-xl border border-zinc-800/60">
-                        <p class="text-[10px] font-black uppercase text-zinc-500 tracking-[0.3em] mb-4">Drawdown Probability Distribution</p>
+                    <div class="bg-zinc-900/30 p-4  border border-terminalBorder/60">
+                        <p class="text-[10px] font-black uppercase text-terminalMuted tracking-[0.3em] mb-4">Drawdown Probability Distribution</p>
                         <div class="h-[200px] sm:h-[240px] w-full relative"><canvas id="drawdownDistributionChart"></canvas></div>
-                        <div class="flex justify-between mt-3 text-[9px] text-zinc-600 uppercase tracking-widest">
+                        <div class="flex justify-between mt-3 text-[9px] text-terminalMuted uppercase tracking-widest">
                             <span>Drag cursor to see probability</span>
                             <span id="dd-cursor-value">-</span>
                         </div>
@@ -744,10 +754,10 @@
             </div>
 
             <!-- Monte Carlo -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em]">Monte Carlo Simulation</h4>
+            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Monte Carlo Simulation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <div class="metric-card bg-white/[0.02] border-white/10"><p class="metric-label">Sims / Sample Size</p><div class="flex items-baseline gap-2"><p id="mc-sim-count" class="text-xl font-light">-</p><span class="text-zinc-600 text-xs">/</span><p id="mc-trade-count" class="text-xl font-light">-</p></div></div>
+                    <div class="metric-card bg-white/[0.02] border-white/10"><p class="metric-label">Sims / Sample Size</p><div class="flex items-baseline gap-2"><p id="mc-sim-count" class="text-xl font-light">-</p><span class="text-terminalMuted text-xs">/</span><p id="mc-trade-count" class="text-xl font-light">-</p></div></div>
                     <div class="metric-card"><p class="metric-label">Median Final Return</p><p id="mc-median-ret" class="metric-value">-</p></div>
                     <div class="metric-card"><p class="metric-label">Best Case (95%)</p><p id="mc-best-case" class="metric-value">-</p></div>
                     <div class="metric-card"><p class="metric-label">Outcome Variance Factor</p><p id="mc-range" class="metric-value">-</p></div>
@@ -760,71 +770,71 @@
                     <div class="metric-card"><p class="metric-label">Stagnation (Median/P95)</p><p id="mc-stagnation" class="metric-value">-</p></div>
                     <div class="metric-card"><p class="metric-label">Bankruptcy Risk</p><p id="mc-ruin" class="metric-value">-</p></div>
                 </div>
-                <div class="mt-6 bg-zinc-900/30 p-4 rounded-xl border border-zinc-800/60">
-                    <p class="text-[10px] font-black uppercase text-zinc-500 tracking-[0.3em] mb-4">Monte Carlo Path Distribution (Percentile Projections)</p>
+                <div class="mt-6 bg-zinc-900/30 p-4  border border-terminalBorder/60">
+                    <p class="text-[10px] font-black uppercase text-terminalMuted tracking-[0.3em] mb-4">Monte Carlo Path Distribution (Percentile Projections)</p>
                     <div class="h-[200px] sm:h-[280px] w-full relative"><canvas id="mcChart"></canvas></div>
                 </div>
             </div>
 
 
             <!-- Monthly Heatmap -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-6 shadow-xl flex flex-col overflow-hidden">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em] flex items-center gap-2"><i class="fa-regular fa-calendar-days text-emerald-400"></i> Monthly Return Sheet (%)</h4>
+            <div class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em] flex items-center gap-2"><i class="fa-regular fa-calendar-days text-terminalGreen"></i> Monthly Return Sheet (%)</h4>
                 <div class="overflow-x-auto">
                     <table class="monthly-table border-collapse border border-zinc-900">
                         <thead>
                             <tr>
                                 <th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
-                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-zinc-500">Annual</th>
+                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-terminalMuted">Annual</th>
                             </tr>
                         </thead>
                         <tbody id="monthly-heatmap-body">
-                            <tr><td colspan="14" class="text-center py-8 text-zinc-700 italic border-none">Awaiting cycles...</td></tr>
+                            <tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting cycles...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Max Drawdown Heatmap -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-6 shadow-xl flex flex-col overflow-hidden">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-2 tracking-[0.3em] flex items-center gap-2"><i class="fa-solid fa-chart-line text-rose-400"></i> Max Drawdown Heatmap (%)</h4>
-                <p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-6">Deepest peak-to-valley drawdown reached during each period (High-Water Mark basis)</p>
+            <div class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-2 tracking-[0.3em] flex items-center gap-2"><i class="fa-solid fa-chart-line text-terminalRed"></i> Max Drawdown Heatmap (%)</h4>
+                <p class="text-[10px] text-terminalMuted uppercase tracking-widest mb-6">Deepest peak-to-valley drawdown reached during each period (High-Water Mark basis)</p>
                 <div class="overflow-x-auto">
                     <table class="monthly-table border-collapse border border-zinc-900">
                         <thead>
                             <tr>
                                 <th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
-                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-zinc-500">Max DD</th>
+                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-terminalMuted">Max DD</th>
                             </tr>
                         </thead>
                         <tbody id="drawdown-heatmap-body">
-                            <tr><td colspan="14" class="text-center py-8 text-zinc-700 italic border-none">Awaiting cycles...</td></tr>
+                            <tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting cycles...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Notional Exposure Matrix -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-6 shadow-xl flex flex-col overflow-hidden">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em] flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-indigo-400"></i> Notional Exposure Matrix (Lots)</h4>
+            <div class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em] flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-terminalCyan"></i> Notional Exposure Matrix (Lots)</h4>
                 <div class="overflow-x-auto">
                     <table class="monthly-table border-collapse border border-zinc-900">
                         <thead>
                             <tr>
                                 <th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
-                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-zinc-500">Total Lots</th>
+                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-terminalMuted">Total Lots</th>
                             </tr>
                         </thead>
                         <tbody id="lots-monthly-body">
-                            <tr><td colspan="14" class="text-center py-8 text-zinc-700 italic border-none">Awaiting cycles...</td></tr>
+                            <tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting cycles...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Commission Rebate Audit -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xl">
-                <h4 class="text-xs font-black uppercase text-zinc-500 mb-6 tracking-[0.3em]">Commission Rebate Audit</h4>
+            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Commission Rebate Audit</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="metric-card"><p class="metric-label">Total Cumulative Lots</p><p id="stat-total-lots" class="metric-value">-</p></div>
                     <div class="metric-card"><p class="metric-label">Est. Rebate ($7/Lot)</p><p id="stat-total-rebate" class="metric-value">-</p></div>
@@ -835,29 +845,29 @@
             </div><!-- /capture-area -->
 
             <!-- Monthly Report Generator -->
-            <div class="bg-darkCard border border-zinc-800 rounded-xl p-3 shadow-sm">
+            <div class="bg-terminalDark border border-terminalBorder p-3">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-file-pdf text-zinc-500 text-sm"></i>
-                        <span class="text-xs font-black uppercase text-zinc-500 tracking-[0.3em]">Monthly Report Generator</span>
+                        <i class="fa-solid fa-file-pdf text-terminalMuted text-sm"></i>
+                        <span class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em]">Monthly Report Generator</span>
                     </div>
                     <div class="flex flex-col sm:flex-row items-center gap-2 flex-wrap">
                         <div class="flex items-center gap-2">
-                            <label class="text-[10px] text-zinc-400 uppercase tracking-wider">Available Months:</label>
-                            <select id="report-month" class="bg-black border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500" style="width: 140px;">
+                            <label class="text-[10px] text-terminalMuted uppercase tracking-wider">AVAILABLE MONTHS:</label>
+                            <select id="report-month" class="bg-terminalBlack border border-terminalBorder px-2 py-1 text-xs text-terminalText focus:outline-none focus:border-terminalAmber font-mono" style="width: 140px;">
                                 <option value="">Select month...</option>
                             </select>
                         </div>
-                        <button onclick="generateMonthlyReport()" class="px-3 py-1 text-xs rounded font-bold transition-all bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-download text-[9px]"></i> Generate Report
+                        <button onclick="generateMonthlyReport()" class="px-3 py-1 text-xs font-bold transition-all bg-terminalGreen text-terminalBlack hover:bg-terminalRed hover:text-terminalText flex items-center gap-1.5">
+                            <i class="fa-solid fa-download text-[9px]"></i> GENERATE REPORT
                         </button>
                     </div>
                 </div>
             </div>
 
         <div class="flex justify-center py-10">
-            <button id="exportBtn" onclick="exportPDF()" class="px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-white text-black text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] font-black hover:bg-zinc-100 transition-all flex items-center gap-2 sm:gap-3 shadow-2xl">
-                <i class="fa-solid fa-file-arrow-down text-sm"></i> Export Audit PDF
+            <button id="exportBtn" onclick="exportPDF()" class="px-6 py-3 sm:px-8 sm:py-4 bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] uppercase tracking-widest font-black hover:border-terminalAmber hover:text-terminalAmber transition-all flex items-center gap-2 sm:gap-3">
+                <i class="fa-solid fa-file-arrow-down text-sm"></i> EXPORT AUDIT PDF
             </button>
         </div>
         </main>
@@ -1014,7 +1024,7 @@
                     dots.classList.add('pin-shake');
                     const hint = document.getElementById('pin-hint');
                     hint.textContent = 'Incorrect PIN';
-                    hint.style.color = '#ef4444';
+                    hint.style.color = '#FF4545';
                     setTimeout(() => {
                         pinEntry = '';
                         updatePinDots();
@@ -1147,7 +1157,7 @@
                 const metricEl = document.getElementById('metric-unrealized-pl');
                 if (countEl) countEl.textContent = 'Offline';
                 if (metricEl) { metricEl.textContent = '$--'; metricEl.className = 'metric-value val-neutral'; }
-                if (tbody) tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-500 font-sans">${message}</td></tr>`;
+                if (tbody) tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-terminalMuted font-sans">${message}</td></tr>`;
             }
 
             function getZoneInfo(timeZone) {
@@ -1178,7 +1188,7 @@
                     if (iconEl) {
                         const hour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone: city.zone }).format(new Date()), 10);
                         const isDay = hour >= 6 && hour < 18;
-                        iconEl.className = `fa-solid fa-${isDay ? 'sun' : 'moon'} ${isDay ? 'text-amber-400' : 'text-slate-400'} text-[9px]`;
+                        iconEl.className = `fa-solid fa-${isDay ? 'sun' : 'moon'} ${isDay ? 'text-terminalAmber' : 'text-terminalMuted'} text-[9px]`;
                     }
                 });
                 const bangkokInfo = getZoneInfo('Asia/Bangkok');
@@ -1261,7 +1271,7 @@
                 const list = document.getElementById('news-calendar-list');
                 const updatedEl = document.getElementById('news-updated-at');
                 
-                if (list) list.innerHTML = '<div class="text-center py-8 text-zinc-500 text-xs">Loading economic calendar…</div>';
+                if (list) list.innerHTML = '<div class="text-center py-8 text-terminalMuted text-xs">Loading economic calendar…</div>';
                 if (updatedEl) updatedEl.textContent = '';
                 
                 try {
@@ -1325,7 +1335,7 @@
                     const events = xmlDoc.getElementsByTagName('event');
                     
                     if (events.length === 0) {
-                        if (list) list.innerHTML = '<div class="text-center py-8 text-zinc-500 text-xs">No events found in the calendar.</div>';
+                        if (list) list.innerHTML = '<div class="text-center py-8 text-terminalMuted text-xs">No events found in the calendar.</div>';
                         return;
                     }
                     
@@ -1367,7 +1377,7 @@
                     
                     // Render events in the dashboard style
                     if (highImpactUSDCount === 0) {
-                        if (list) list.innerHTML = '<div class="text-center py-8 text-zinc-500 text-xs">No high impact USD events found in the calendar.</div>';
+                        if (list) list.innerHTML = '<div class="text-center py-8 text-terminalMuted text-xs">No high impact USD events found in the calendar.</div>';
                     } else {
                         if (list) {
                             list.innerHTML = '';
@@ -1377,16 +1387,16 @@
                                 row.className = `flex items-center gap-3 rounded-lg border px-3 py-2 transition-all hover:brightness-125 ${style.border} ${style.bg}`;
                                 row.innerHTML = `
                                     <div class="flex flex-col items-center justify-center min-w-[68px] text-center">
-                                        <span class="text-[9px] uppercase tracking-widest text-zinc-500">${e.date}</span>
+                                        <span class="text-[9px] uppercase tracking-widest text-terminalMuted">${e.date}</span>
                                         <span class="text-xs font-black ${style.text}">${e.time}</span>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-bold text-slate-200 truncate">${e.title}</p>
+                                        <p class="text-xs font-bold text-terminalText truncate">${e.title}</p>
                                         <p class="text-[9px] uppercase tracking-widest ${style.text}">${e.impact} Impact</p>
                                     </div>
                                     <div class="flex gap-4 text-right shrink-0">
-                                        <div><p class="text-[8px] text-zinc-600 uppercase tracking-widest">Forecast</p><p class="text-xs font-mono text-slate-300">${e.forecast || '—'}</p></div>
-                                        <div><p class="text-[8px] text-zinc-600 uppercase tracking-widest">Previous</p><p class="text-xs font-mono text-slate-400">${e.previous || '—'}</p></div>
+                                        <div><p class="text-[8px] text-terminalMuted uppercase tracking-widest">Forecast</p><p class="text-xs font-mono text-terminalText">${e.forecast || '—'}</p></div>
+                                        <div><p class="text-[8px] text-terminalMuted uppercase tracking-widest">Previous</p><p class="text-xs font-mono text-terminalMuted">${e.previous || '—'}</p></div>
                                     </div>
                                 `;
                                 list.appendChild(row);
@@ -1405,7 +1415,7 @@
                     // Show error instead of fallback
                     if (list) {
                         list.innerHTML = `
-                            <div class="text-center py-8 text-zinc-500 text-xs">
+                            <div class="text-center py-8 text-terminalMuted text-xs">
                                 <p class="font-bold">Unable to load live economic calendar</p>
                                 <p class="text-[10px] mt-2 opacity-70">Error: ${error.message}</p>
                                 <p class="text-[10px] mt-1 opacity-50">External service blocking requests via CORS policy</p>
@@ -1419,10 +1429,10 @@
 
             function newsImpactStyle(impact) {
                 switch ((impact || '').toLowerCase()) {
-                    case 'high':    return { border: 'border-rose-500/30',   bg: 'bg-rose-500/5',   text: 'text-rose-400' };
-                    case 'medium':  return { border: 'border-amber-500/30',  bg: 'bg-amber-500/5',  text: 'text-amber-400' };
-                    case 'holiday': return { border: 'border-blue-500/30',   bg: 'bg-blue-500/5',   text: 'text-blue-400' };
-                    default:        return { border: 'border-zinc-800',      bg: 'bg-zinc-900/20',  text: 'text-zinc-500' };
+                    case 'high':    return { border: 'border-terminalRed/30',   bg: 'bg-terminalRed/5',   text: 'text-terminalRed' };
+                    case 'medium':  return { border: 'border-terminalAmber/30',  bg: 'bg-terminalAmber/5',  text: 'text-terminalAmber' };
+                    case 'holiday': return { border: 'border-terminalCyan/30',   bg: 'bg-terminalCyan/5',   text: 'text-terminalCyan' };
+                    default:        return { border: 'border-terminalBorder',      bg: 'bg-terminalDark/20',  text: 'text-terminalMuted' };
                 }
             }
 
@@ -1628,29 +1638,29 @@
 
                 tbody.innerHTML = '';
                 if (trades.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-500 font-sans">No open positions detected.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-terminalMuted font-sans">No open positions detected.</td></tr>`;
                 } else {
                     trades.forEach(t => {
                         const gainPercent = (!isNaN(latestPortfolioBalance) && latestPortfolioBalance !== 0) ? (t.profit / latestPortfolioBalance) * 100 : 0;
                         const gainDisplay = latestPortfolioBalance && !isNaN(latestPortfolioBalance) ? `${gainPercent >= 0 ? '+' : ''}${gainPercent.toFixed(2)}%` : '—';
                         const holdingText = formatDuration(t.holdingMs);
                         const row = document.createElement('tr');
-                        row.className = "hover:bg-zinc-900/60 transition-colors";
+                        row.className = "hover:bg-terminalPanel transition-colors";
                         const typeLabel = t.type.toLowerCase().includes('buy') ? 'LONG' : t.type.toLowerCase().includes('sell') ? 'SHORT' : t.type;
-                        const typeColor = t.type.toLowerCase().includes('buy') ? 'text-emerald-400' : 'text-rose-400';
+                        const typeColor = t.type.toLowerCase().includes('buy') ? 'text-terminalGreen' : 'text-terminalRed';
                         row.innerHTML = `
-                            <td class="px-4 py-2 text-slate-400 font-mono text-[11px] col-open-time">${t.time}</td>
-                            <td class="px-4 py-2 text-slate-200 font-bold col-symbol">${t.symbol}</td>
+                            <td class="px-4 py-2 text-terminalMuted font-mono text-[11px] col-open-time">${t.time}</td>
+                            <td class="px-4 py-2 text-terminalText font-bold col-symbol">${t.symbol}</td>
                             <td class="px-4 py-2 col-type"><span class="text-[10px] font-bold uppercase ${typeColor}">${typeLabel}</span></td>
                             <td class="px-4 py-2 text-right font-mono text-[11px] col-volume">${t.volume}</td>
                             <td class="px-4 py-2 text-right font-mono text-[11px] col-open-price">${t.openPrice || '—'}</td>
                             <td class="px-4 py-2 text-right font-mono text-[11px] col-tp">${t.takeProfit || '—'}</td>
                             <td class="px-4 py-2 text-right font-mono text-[11px] col-sl">${t.stopLoss || '—'}</td>
                             <td class="px-4 py-2 text-right font-mono text-[11px] col-current-price">${t.currentPrice || '—'}</td>
-                            <td class="px-4 py-2 text-right font-bold ${gainPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'} col-gain">${gainDisplay}</td>
+                            <td class="px-4 py-2 text-right font-bold ${gainPercent >= 0 ? 'text-terminalGreen' : 'text-terminalRed'} col-gain">${gainDisplay}</td>
                             <td class="px-4 py-2 text-right text-zinc-400 font-mono text-[11px] col-commission">$${parseFloat(t.commission || 0).toFixed(2)}</td>
                             <td class="px-4 py-2 text-right text-zinc-400 font-mono text-[11px] col-swap">$${parseFloat(t.swap || 0).toFixed(2)}</td>
-                            <td class="px-4 py-2 text-right font-bold ${t.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'} col-profit">${t.profit >= 0 ? '+' : ''}$${t.profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                            <td class="px-4 py-2 text-right font-bold ${t.profit >= 0 ? 'text-terminalGreen' : 'text-terminalRed'} col-profit">${t.profit >= 0 ? '+' : ''}$${t.profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                             <td class="px-4 py-2 text-right font-mono text-[11px] col-holding">${holdingText}</td>
                         `;
                         tbody.appendChild(row);
@@ -1666,15 +1676,15 @@
                     }
 
                     const summaryRow = document.createElement('tr');
-                    summaryRow.className = "bg-zinc-900/80 text-slate-200 font-semibold border-t border-zinc-800";
+                    summaryRow.className = "bg-zinc-900/80 text-terminalText font-semibold border-t border-terminalBorder";
                     summaryRow.innerHTML = `
-                        <td class="px-4 py-3 text-slate-300" colspan="3">Open Position Summary</td>
+                        <td class="px-4 py-3 text-terminalText" colspan="3">Open Position Summary</td>
                         <td class="px-4 py-3 text-right font-mono text-[11px]">${totalVolume > 0 ? totalVolume.toFixed(2) : '—'}</td>
                         <td class="px-4 py-3"></td><td class="px-4 py-3"></td><td class="px-4 py-3"></td><td class="px-4 py-3"></td>
-                        <td class="px-4 py-3 text-right font-bold ${totalGainPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${totalGainDisplay}</td>
+                        <td class="px-4 py-3 text-right font-bold ${totalGainPercent >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}">${totalGainDisplay}</td>
                         <td class="px-4 py-3 text-right font-mono text-[11px]">$${totalCommission.toFixed(2)}</td>
                         <td class="px-4 py-3 text-right font-mono text-[11px]">$${totalSwap.toFixed(2)}</td>
-                        <td class="px-4 py-3 text-right font-bold ${totalUnrealized >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${totalUnrealized >= 0 ? '+' : ''}$${totalUnrealized.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                        <td class="px-4 py-3 text-right font-bold ${totalUnrealized >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}">${totalUnrealized >= 0 ? '+' : ''}$${totalUnrealized.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                         <td class="px-4 py-3"></td>
                     `;
                     tbody.appendChild(summaryRow);
@@ -2171,7 +2181,7 @@
                 // Filter only non-funding trades for TWR calculation
                 // When date filter is enabled (specific period), exclude funding; when disabled (since start), include funding
                 const trades = effectiveList.filter(i => dateFilterEnabled ? (!i.isFunding && i.tradeReturnPercent !== undefined) : (i.tradeReturnPercent !== undefined));
-                if (trades.length === 0) { tbody.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-zinc-700 italic border-none">Awaiting data...</td></tr>'; return; }
+                if (trades.length === 0) { tbody.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting data...</td></tr>'; return; }
 
                 // Build compounding monthly returns using TWR (same as 3rd party)
                 const monthlyMap = {};
@@ -2208,15 +2218,15 @@
                     const norm = Math.min(Math.abs(val) / maxAbs, 1); // 0–1
                     // Use a gentle opacity curve: floor at 0.08, ceiling at 0.75
                     const opacity = 0.08 + norm * 0.67;
-                    if (val > 0.001)  return `background:rgba(16,185,129,${opacity.toFixed(3)});color:${norm > 0.45 ? '#fff' : '#10b981'};`;
-                    if (val < -0.001) return `background:rgba(239,68,68,${opacity.toFixed(3)});color:${norm > 0.45 ? '#fff' : '#ef4444'};`;
-                    return 'color:#52525b;';
+                    if (val > 0.001)  return `background:rgba(0,200,83,${opacity.toFixed(3)});color:${norm > 0.45 ? '#fff' : '#00C853'};`;
+                    if (val < -0.001) return `background:rgba(255,69,69,${opacity.toFixed(3)});color:${norm > 0.45 ? '#fff' : '#FF4545'};`;
+                    return 'color:#858585;';
                 }
 
                 function annualStyle(val) {
-                    if (val > 0.01)  return 'background:rgba(16,185,129,0.18);color:#10b981;';
-                    if (val < -0.01) return 'background:rgba(239,68,68,0.18);color:#ef4444;';
-                    return 'color:#71717a;';
+                    if (val > 0.01)  return 'background:rgba(0,200,83,0.18);color:#00C853;';
+                    if (val < -0.01) return 'background:rgba(255,69,69,0.18);color:#FF4545;';
+                    return 'color:#858585;';
                 }
 
                 const sortedYears = Object.keys(yearsMap).sort((a, b) => b - a);
@@ -2224,7 +2234,7 @@
                     const row = document.createElement('tr');
                     row.className = "border-b border-zinc-900/50 hover:brightness-110 transition-all";
                     let annualTotal = 0;
-                    let html = `<td class="py-3 px-2 text-left font-black text-slate-400 border-r border-zinc-900 bg-black/20 text-[11px]">${year}</td>`;
+                    let html = `<td class="py-3 px-2 text-left font-black text-terminalMuted border-r border-zinc-900 bg-black/20 text-[11px]">${year}</td>`;
                     for (let m = 0; m < 12; m++) {
                         const val = yearsMap[year][m];
                         if (val === null) {
@@ -2301,7 +2311,7 @@
                 const { matrix, yearly } = computeDrawdownMatrix(effectiveList);
                 const sortedYears = Object.keys(matrix).sort((a, b) => b - a);
                 if (sortedYears.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-zinc-700 italic border-none">Awaiting data...</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting data...</td></tr>';
                     return;
                 }
 
@@ -2314,10 +2324,10 @@
                     if (val === 0) return '';
                     const norm = Math.min(Math.abs(val) / maxAbs, 1);
                     const opacity = 0.08 + norm * 0.67;
-                    return `background:rgba(239,68,68,${opacity.toFixed(3)});color:${norm > 0.45 ? '#fff' : '#ef4444'};`;
+                    return `background:rgba(239,68,68,${opacity.toFixed(3)});color:${norm > 0.45 ? '#fff' : '#FF4545'};`;
                 }
                 function ddAnnualStyle(val) {
-                    if (val < -0.01) return 'background:rgba(239,68,68,0.18);color:#ef4444;';
+                    if (val < -0.01) return 'background:rgba(239,68,68,0.18);color:#FF4545;';
                     return 'color:#71717a;';
                 }
 
@@ -2325,7 +2335,7 @@
                 sortedYears.forEach(year => {
                     const row = document.createElement('tr');
                     row.className = "border-b border-zinc-900/50 hover:brightness-110 transition-all";
-                    let html = `<td class="py-3 px-2 text-left font-black text-slate-400 border-r border-zinc-900 bg-black/20 text-[11px]">${year}</td>`;
+                    let html = `<td class="py-3 px-2 text-left font-black text-terminalMuted border-r border-zinc-900 bg-black/20 text-[11px]">${year}</td>`;
                     for (let m = 0; m < 12; m++) {
                         const val = matrix[year][m];
                         if (val === 0) {
@@ -2469,7 +2479,7 @@
                             { x: fivePercentThreshold, y: 0 },
                             { x: fivePercentThreshold, y: 100 }
                         ],
-                        borderColor: '#10b981',
+                        borderColor: '#00C853',
                         borderWidth: 2,
                         borderDash: [5, 5],
                         fill: false,
@@ -2602,7 +2612,7 @@
                 // When date filter is disabled (since start), show all including funding
                 countEl.textContent = `${effectiveList.length} Entries`;
                 const displayList = [...effectiveList].reverse();
-                if (displayList.length === 0) { tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-500 font-sans">Awaiting data records...</td></tr>`; return; }
+                if (displayList.length === 0) { tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-terminalMuted font-sans">Awaiting data records...</td></tr>`; return; }
 
                 displayList.forEach(item => {
                     const isFunding = item.isFunding;
@@ -2622,31 +2632,31 @@
                     if (isFunding) {
                         typeBadge = item.profit >= 0
                             ? `<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded text-[10px] font-bold">Deposit</span>`
-                            : `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded text-[10px] font-bold">Withdrawals</span>`;
+                            : `<span class="bg-amber-500/10 text-terminalAmber border border-amber-500/20 px-1.5 py-0.5 rounded text-[10px] font-bold">Withdrawals</span>`;
                     } else {
                         const tType = (item.type || '').toLowerCase();
-                        if (tType.includes('buy') || tType.includes('long')) typeBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[10px] font-bold">LONG</span>`;
-                        else if (tType.includes('sell') || tType.includes('short')) typeBadge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded text-[10px] font-bold">SHORT</span>`;
-                        else typeBadge = `<span class="bg-zinc-800 text-slate-300 border border-zinc-700 px-1.5 py-0.5 rounded text-[10px] font-bold">Trade</span>`;
+                        if (tType.includes('buy') || tType.includes('long')) typeBadge = `<span class="bg-emerald-500/10 text-terminalGreen border border-emerald-500/20 px-1.5 py-0.5 rounded text-[10px] font-bold">LONG</span>`;
+                        else if (tType.includes('sell') || tType.includes('short')) typeBadge = `<span class="bg-rose-500/10 text-terminalRed border border-rose-500/20 px-1.5 py-0.5 rounded text-[10px] font-bold">SHORT</span>`;
+                        else typeBadge = `<span class="bg-zinc-800 text-terminalText border border-zinc-700 px-1.5 py-0.5 rounded text-[10px] font-bold">Trade</span>`;
                     }
                     let tradeGainText = '-';
                     if (!isFunding) tradeGainText = `${item.profit >= 0 ? '+' : ''}${item.tradeReturnPercent.toFixed(2)}%`;
 
                     const row = document.createElement('tr');
-                    row.className = "hover:bg-zinc-900/60 transition-colors";
+                    row.className = "hover:bg-terminalPanel transition-colors";
                     row.innerHTML = `
-                        <td class="px-4 py-2 text-slate-400 font-mono text-[11px]">${item.rawOpenDate || item.rawDate}</td>
-                        <td class="px-4 py-2 text-slate-400 font-mono text-[11px]">${item.rawDate}</td>
-                        <td class="px-4 py-2 text-slate-200 font-bold">${item.symbol || '—'}</td>
+                        <td class="px-4 py-2 text-terminalMuted font-mono text-[11px]">${item.rawOpenDate || item.rawDate}</td>
+                        <td class="px-4 py-2 text-terminalMuted font-mono text-[11px]">${item.rawDate}</td>
+                        <td class="px-4 py-2 text-terminalText font-bold">${item.symbol || '—'}</td>
                         <td class="px-4 py-2">${typeBadge}</td>
                         <td class="px-4 py-2 text-right font-mono text-[11px]">${item.volume ? item.volume.toFixed(2) : '—'}</td>
                         <td class="px-4 py-2 text-right font-mono text-[11px]">${item.openPrice ? item.openPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:5}) : '—'}</td>
                         <td class="px-4 py-2 text-right font-mono text-[11px]">${item.closePrice ? item.closePrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:5}) : '—'}</td>
-                        <td class="px-4 py-2 text-right font-bold ${item.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${item.profit >= 0 ? '+' : ''}$${item.profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-                        <td class="px-4 py-2 text-right font-bold ${item.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${tradeGainText}</td>
+                        <td class="px-4 py-2 text-right font-bold ${item.profit >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}">${item.profit >= 0 ? '+' : ''}$${item.profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                        <td class="px-4 py-2 text-right font-bold ${item.profit >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}">${tradeGainText}</td>
                         <td class="px-4 py-2 text-right text-zinc-400 font-mono text-[11px]">${item.commission ? '$' + item.commission.toFixed(2) : '—'}</td>
                         <td class="px-4 py-2 text-right text-zinc-400 font-mono text-[11px]">${item.swap ? '$' + item.swap.toFixed(2) : '—'}</td>
-                        <td class="px-4 py-2 text-right text-zinc-500 font-mono text-[11px]">${item.magic || '—'}</td>
+                        <td class="px-4 py-2 text-right text-terminalMuted font-mono text-[11px]">${item.magic || '—'}</td>
                         <td class="px-4 py-2 text-right font-mono text-zinc-300 text-[11px]">${holdingTime}</td>
                     `;
                     tbody.appendChild(row);
@@ -2735,7 +2745,7 @@
                 const btnNews = document.getElementById('btn-view-news');
 
                 const activeCls = "px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white flex items-center gap-1.5";
-                const inactiveCls = "px-3 py-1 text-xs rounded font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1.5";
+                const inactiveCls = "px-3 py-1 text-xs rounded font-bold transition-all text-terminalMuted hover:text-terminalText flex items-center gap-1.5";
 
                 if (view === 'news') {
                     chartView.classList.add('hidden');
@@ -2762,8 +2772,8 @@
                 activeChartType = type;
                 const btnGain = document.getElementById('btn-chart-gain');
                 const btnBal = document.getElementById('btn-chart-balance');
-                if (type === 'gain') { btnGain.className = "px-3 py-1 text-xs rounded font-medium transition-all bg-emerald-600 text-white shadow"; btnBal.className = "px-3 py-1 text-xs rounded font-medium transition-all text-slate-400 hover:text-slate-200"; }
-                else { btnBal.className = "px-3 py-1 text-xs rounded font-medium transition-all bg-emerald-600 text-white shadow"; btnGain.className = "px-3 py-1 text-xs rounded font-medium transition-all text-slate-400 hover:text-slate-200"; }
+                if (type === 'gain') { btnGain.className = "px-3 py-1 text-xs rounded font-medium transition-all bg-emerald-600 text-white shadow"; btnBal.className = "px-3 py-1 text-xs rounded font-medium transition-all text-terminalMuted hover:text-terminalText"; }
+                else { btnBal.className = "px-3 py-1 text-xs rounded font-medium transition-all bg-emerald-600 text-white shadow"; btnGain.className = "px-3 py-1 text-xs rounded font-medium transition-all text-terminalMuted hover:text-terminalText"; }
                 if (processedList.length > 0) renderChart(processedList);
             }
             function changePeriodMode(mode) {
@@ -2771,7 +2781,7 @@
                 isFirstDrawdownRender = true; // re-animate drawdown on period change
                 ['trade','daily','monthly','yearly'].forEach(btn => {
                     const el = document.getElementById(`btn-period-${btn}`);
-                    el.className = btn === mode ? "px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white" : "px-3 py-1 text-xs rounded font-bold transition-all text-slate-400 hover:text-slate-200";
+                    el.className = btn === mode ? "px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white" : "px-3 py-1 text-xs rounded font-bold transition-all text-terminalMuted hover:text-terminalText";
                 });
                 if (processedList.length > 0) renderChart(processedList);
             }
@@ -2890,24 +2900,24 @@
                         // Main closed-trades line
                         { label: labelString, data: datasetValues,
                             borderColor: activeChartType === 'gain'
-                                ? (c) => buildDynColor(c.chart, '#10b981', '#ef4444', '#10b981')
-                                : '#3b82f6',
+                                ? (c) => buildDynColor(c.chart, '#00C853', '#FF4545', '#00C853')
+                                : '#00D5E8',
                             borderWidth: 2.5,
                             backgroundColor: activeChartType === 'gain'
-                                ? (c) => buildDynColor(c.chart, 'rgba(16,185,129,0.28)', 'rgba(239,68,68,0.28)', 'rgba(16,185,129,0.15)')
-                                : (c) => { const g = c.chart.ctx.createLinearGradient(0,0,0,300); g.addColorStop(0,'rgba(59,130,246,0.25)'); g.addColorStop(1,'rgba(59,130,246,0)'); return g; },
+                                ? (c) => buildDynColor(c.chart, 'rgba(0,200,83,0.28)', 'rgba(255,69,69,0.28)', 'rgba(0,200,83,0.15)')
+                                : (c) => { const g = c.chart.ctx.createLinearGradient(0,0,0,300); g.addColorStop(0,'rgba(0,213,232,0.25)'); g.addColorStop(1,'rgba(0,213,232,0)'); return g; },
                             fill: true, tension: 0.1,
                             pointRadius: aggregatedData.length < 50 ? 3 : 0,
                             pointBackgroundColor: (c) => {
                                 const v = c.raw;
-                                return activeChartType === 'gain' ? (v >= 0 ? '#10b981' : '#ef4444') : '#3b82f6';
+                                return activeChartType === 'gain' ? (v >= 0 ? '#00C853' : '#FF4545') : '#00D5E8';
                             },
                             pointHoverRadius: 6, pointHitRadius: 10
                         },
                         // Horizontal dashed lines for highest and lowest gain (only in gain mode)
                         ...(activeChartType === 'gain' && datasetValues.length > 0 ? [
-                            { data: Array(datasetValues.length).fill(highestGain), borderColor:'#10b981', borderWidth:1, borderDash:[5,5], pointRadius:0, fill:false },
-                            { data: Array(datasetValues.length).fill(lowestGain), borderColor:'#ef4444', borderWidth:1, borderDash:[5,5], pointRadius:0, fill:false }
+                            { data: Array(datasetValues.length).fill(highestGain), borderColor:'#00C853', borderWidth:1, borderDash:[5,5], pointRadius:0, fill:false },
+                            { data: Array(datasetValues.length).fill(lowestGain), borderColor:'#FF4545', borderWidth:1, borderDash:[5,5], pointRadius:0, fill:false }
                         ] : [])
                     ] },
                     options: {
@@ -2949,8 +2959,8 @@
                         plugins: { legend: { display:false }, tooltip: { backgroundColor:'#09090b', titleColor:'#71717a', bodyColor:'#f8fafc', borderColor:'#27272a', borderWidth:1, padding:10, displayColors:false,
                             callbacks: { title: (c) => c[0].label.replace('#', ''), label: (c) => activeChartType === 'gain' ? `Gain: ${c.raw}%` : `Balance: $${c.raw.toLocaleString(undefined,{minimumFractionDigits:2})}` } } },
                         scales: {
-                            x: { grid:{ color:'#18181b', drawTicks:false }, ticks:{ color:'#71717a', font:{size:10}, maxTicksLimit:8 } },
-                            y: { grid:{ color:'#18181b', drawTicks:false }, ticks:{ color:'#71717a', font:{size:10}, callback: v => activeChartType === 'gain' ? v + '%' : '$' + v.toLocaleString() } }
+                            x: { grid:{ color:'#383838', drawTicks:false }, ticks:{ color:'#858585', font:{size:10, family:'monospace'}, maxTicksLimit:8 } },
+                            y: { grid:{ color:'#383838', drawTicks:false }, ticks:{ color:'#858585', font:{size:10, family:'monospace'}, callback: v => activeChartType === 'gain' ? v + '%' : '$' + v.toLocaleString() } }
                         }
                     }
                 });
@@ -3015,9 +3025,9 @@
                 drawdownChartInstance = new Chart(ddCtx, {
                     type: 'line',
                     data: { labels, datasets: [
-                        { data: ddSeries, borderColor:'#ef4444', borderWidth:1.5, pointRadius:0, fill:'origin', backgroundColor:'rgba(239,68,68,0.15)', tension:0.1 },
+                        { data: ddSeries, borderColor:'#FF4545', borderWidth:1.5, pointRadius:0, fill:'origin', backgroundColor:'rgba(255,69,69,0.15)', tension:0.1 },
                         // Horizontal dashed line at max drawdown
-                        ...(ddSeries.length > 0 ? [{ data: Array(ddSeries.length).fill(maxDrawdown), borderColor:'#ef4444', borderWidth:1, borderDash:[5,5], pointRadius:0, pointHoverRadius:0, fill:false }] : [])
+                        ...(ddSeries.length > 0 ? [{ data: Array(ddSeries.length).fill(maxDrawdown), borderColor:'#FF4545', borderWidth:1, borderDash:[5,5], pointRadius:0, pointHoverRadius:0, fill:false }] : [])
                     ] },
                     options: {
                         responsive:true, maintainAspectRatio:false, interaction:{ intersect:false, mode:'index' },
@@ -3051,7 +3061,7 @@
                         } : false,
                         layout: { padding: { bottom: 30, left: 5, right: 5 } },
                         plugins: { legend:{ display:false }, tooltip:{ enabled:true, backgroundColor:'rgba(9,9,11,0.95)', filter:(item) => item.datasetIndex === 0, callbacks:{ title: (c) => c[0].label.replace('#', ''), label:(c) => `Drawdown: ${c.parsed.y.toFixed(2)}%` } } },
-                        scales: { x:{ display:false }, y:{ grid:{ color:'rgba(255,255,255,0.02)' }, ticks:{ color:'#52525b', font:{size:8}, padding: 10, callback:v=>v.toFixed(1)+'%' }, max:0 } }
+                        scales: { x:{ display:false }, y:{ grid:{ color:'#383838' }, ticks:{ color:'#858585', font:{size:8, family:'monospace'}, padding: 10, callback:v=>v.toFixed(1)+'%' }, max:0 } }
                     }
                 });
                 isFirstDrawdownRender = false;
@@ -3264,7 +3274,7 @@
                 if (hourlyChartInstance) hourlyChartInstance.destroy();
                 hourlyChartInstance = new Chart(ctx, {
                     type: 'bar',
-                    data: { labels: Array.from({length:24}, (_,i)=>`${i}:00`), datasets: [{ data, backgroundColor: data.map(v => v >= 0 ? '#10b981' : '#ef4444'), borderRadius:50 }] },
+                    data: { labels: Array.from({length:24}, (_,i)=>`${i}:00`), datasets: [{ data, backgroundColor: data.map(v => v >= 0 ? '#00C853' : '#FF4545'), borderRadius:0 }] },
                     options: {
                         responsive:true, maintainAspectRatio:false,
                         plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>`Total Return: ${c.parsed.y.toFixed(2)}%` } } },
@@ -3278,7 +3288,7 @@
                 const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
                 dailyPatternChartInstance = new Chart(ctx, {
                     type: 'bar',
-                    data: { labels, datasets: [{ data, backgroundColor: data.map(v => v >= 0 ? '#10b981' : '#ef4444'), borderRadius:50 }] },
+                    data: { labels, datasets: [{ data, backgroundColor: data.map(v => v >= 0 ? '#00C853' : '#FF4545'), borderRadius:0 }] },
                     options: {
                         responsive:true, maintainAspectRatio:false,
                         plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>`Total Return: ${c.parsed.y.toFixed(2)}%` } } },
@@ -3330,8 +3340,8 @@
                 attributionChartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: { labels: ['Distribution'], datasets: [
-                        { label:'LONG', data:[totalBuy], backgroundColor:'#10b981', barThickness:24, borderRadius:{topLeft:50,bottomLeft:50}, borderSkipped:false },
-                        { label:'SHORT', data:[totalSell], backgroundColor:'#ef4444', barThickness:24, borderRadius:{topRight:50,bottomRight:50}, borderSkipped:false }
+                        { label:'LONG', data:[totalBuy], backgroundColor:'#00C853', barThickness:24, borderRadius:{topLeft:50,bottomLeft:50}, borderSkipped:false },
+                        { label:'SHORT', data:[totalSell], backgroundColor:'#FF4545', barThickness:24, borderRadius:{topRight:50,bottomRight:50}, borderSkipped:false }
                     ] },
                     options: {
                         indexAxis:'y', responsive:true, maintainAspectRatio:false,
@@ -3361,7 +3371,7 @@
                 if (!body) return;
                 body.innerHTML = '';
                 const sortedYears = Object.keys(lotMatrix).sort().reverse();
-                if (sortedYears.length === 0) { body.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-zinc-700 italic border-none">Awaiting cycles...</td></tr>'; return; }
+                if (sortedYears.length === 0) { body.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting cycles...</td></tr>'; return; }
 
                 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                 sortedYears.forEach(year => {
@@ -3378,7 +3388,7 @@
                         yearlyLots += lots;
                     }
                     const totalRebateY = (yearlyLots * REBATE_PER_LOT).toFixed(2);
-                    html += `<td class="font-black text-zinc-500 cursor-pointer" onmouseenter="showTableTooltip('Annual','${year}','${totalRebateY}',true)" onmouseleave="hideTableTooltip()">${yearlyLots.toFixed(2)}</td>`;
+                    html += `<td class="font-black text-terminalMuted cursor-pointer" onmouseenter="showTableTooltip('Annual','${year}','${totalRebateY}',true)" onmouseleave="hideTableTooltip()">${yearlyLots.toFixed(2)}</td>`;
                     row.innerHTML = html;
                     body.appendChild(row);
                 });
@@ -3386,7 +3396,7 @@
 
             window.showTableTooltip = (period, year, val, isLots = true) => {
                 const tooltip = document.getElementById('table-tooltip');
-                tooltip.innerHTML = `<div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">${isLots ? 'Notional Exposure' : 'Monthly Return'} — ${period} ${year}</div><div class="text-xs font-light text-white">${isLots ? 'Rebate: $' + val : 'Yield: ' + val + '%'}</div>`;
+                tooltip.innerHTML = `<div class="text-[10px] font-black text-terminalMuted uppercase tracking-widest mb-1">${isLots ? 'Notional Exposure' : 'Monthly Return'} — ${period} ${year}</div><div class="text-xs font-light text-white">${isLots ? 'Rebate: $' + val : 'Yield: ' + val + '%'}</div>`;
                 tooltip.style.display = 'block';
             };
             window.hideTableTooltip = () => { document.getElementById('table-tooltip').style.display = 'none'; };
@@ -3507,7 +3517,7 @@
                 document.getElementById('mc-worst-ret').className = `metric-value ${varLoss > 0 ? 'val-neg' : 'val-neutral'}`;
                 document.getElementById('mc-median-dd').innerText = medianDD.toFixed(2) + "%";
                 document.getElementById('mc-worst-dd').innerText = worstDD.toFixed(2) + "%";
-                document.getElementById('mc-stagnation').innerHTML = `${stagnation}<span class="text-xs text-zinc-600 ml-2">/ ${p95Stag}</span>`;
+                document.getElementById('mc-stagnation').innerHTML = `${stagnation}<span class="text-xs text-terminalMuted ml-2">/ ${p95Stag}</span>`;
                 document.getElementById('mc-prob-profit').innerText = probProfit.toFixed(2) + "%";
                 document.getElementById('mc-prob-profit').className = `metric-value ${probProfit >= 50 ? 'val-pos' : 'val-neg'}`;
                 document.getElementById('mc-ruin').innerText = ruin.toFixed(2) + "%";
@@ -3523,9 +3533,9 @@
                 mcChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: { labels, datasets: [
-                        { label:'Highest Projection (95%)', data:p95, borderColor:'#10b981', borderWidth:2, pointRadius:0, tension:0.1, fill:false },
-                        { label:'Median Expectancy', data:p50, borderColor:'#ffffff', borderWidth:2, pointRadius:0, tension:0.1, fill:false },
-                        { label:'Lowest Projection (5%)', data:p5, borderColor:'#ef4444', borderWidth:2, pointRadius:0, tension:0.1, fill:false }
+                        { label:'Highest Projection (95%)', data:p95, borderColor:'#00C853', borderWidth:2, pointRadius:0, tension:0.1, fill:false },
+                        { label:'Median Expectancy', data:p50, borderColor:'#D6D6D6', borderWidth:2, pointRadius:0, tension:0.1, fill:false },
+                        { label:'Lowest Projection (5%)', data:p5, borderColor:'#FF4545', borderWidth:2, pointRadius:0, tension:0.1, fill:false }
                     ] },
                     options: {
                         responsive:true, maintainAspectRatio:false, interaction:{ intersect:false, mode:'index' },
