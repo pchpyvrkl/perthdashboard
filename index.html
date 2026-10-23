@@ -289,6 +289,12 @@
                         <button class="pin-key del" style="width:58px;height:52px;font-size:.85rem;" onclick="pinDel()">⌫</button>
                     </div>
 
+                    <!-- Privacy Mode Toggle -->
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+                        <input type="checkbox" id="privacy-mode-toggle" style="cursor:pointer;">
+                        <label for="privacy-mode-toggle" style="font-size:9px;text-transform:uppercase;letter-spacing:.3em;color:#52525b;cursor:pointer;">Hide Financial Values</label>
+                    </div>
+
                 </div>
 
                 <p id="pin-hint" style="font-size:8px;text-transform:uppercase;letter-spacing:.25em;color:#3f3f46;height:12px;margin-top:20px;"></p>
@@ -323,7 +329,9 @@
                         <button onclick="toggleFullscreen()" class="text-terminalAmber hover:text-terminalText transition-colors" title="Toggle Fullscreen">
                             <i class="fa-solid fa-expand"></i>
                         </button>
+                        <span id="bangkok-icon" class="text-terminalAmber text-[14px]">☼</span>
                         <span id="bangkok-text">BKK: --:-- (UTC+7)</span>
+                        <span id="bangkok-date" class="text-terminalMuted">--</span>
                         <span class="text-terminalAmber">●</span>
                         <span>LIVE DATA</span>
                     </div>
@@ -349,15 +357,11 @@
                         <span class="text-terminalAmber font-bold">CMD:</span>
                         <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="clearDateFilter()">OVERVIEW</span>
                         <span class="text-terminalMuted">|</span>
-                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">PORTFOLIO</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="scrollToTransactions()">PORTFOLIO</span>
                         <span class="text-terminalMuted">|</span>
-                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">PERFORMANCE</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="scrollToRisk()">RISK</span>
                         <span class="text-terminalMuted">|</span>
-                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">EXPOSURE</span>
-                        <span class="text-terminalMuted">|</span>
-                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">RISK</span>
-                        <span class="text-terminalMuted">|</span>
-                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors">MARKETS</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="scrollToSimulation()">SIMULATION</span>
                     </div>
                     <div class="flex items-center gap-2 text-[10px]">
                         <span class="text-terminalMuted uppercase">DATE RANGE:</span>
@@ -373,7 +377,7 @@
             <div id="capture-area" class="space-y-6">
 
             <!-- Top Metric Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1 border-b border-terminalBorder pb-2">
+            <div id="metrics-section" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1 border-b border-terminalBorder pb-2">
                 <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
                     <p class="metric-label">GAIN (TWR)</p>
                     <p id="metric-twr-gain" class="metric-value val-pos">--%</p>
@@ -416,7 +420,7 @@
             </div>
 
             <!-- Main Chart & Sidebar Analytics (toggles between Equity Chart and US News) -->
-            <div class="grid grid-cols-1 gap-4">
+            <div id="chart-section" class="grid grid-cols-1 gap-4">
                 <div class="bg-terminalDark border border-terminalBorder p-3 flex flex-col justify-between">
                     <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
                         <div>
@@ -473,7 +477,7 @@
                 </div>
             </div>
             <!-- Open Trades -->
-            <div class="bg-terminalDark border border-terminalBorder p-3 flex flex-col" style="overflow:hidden;">
+            <div id="open-trades-section" class="bg-terminalDark border border-terminalBorder p-3 flex flex-col" style="overflow:hidden;">
                 <div class="flex justify-between items-center mb-2">
                     <h4 class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">OPEN POSITIONS (UNREALIZED)</h4>
                     <span id="open-trades-count" class="text-[10px] text-terminalAmber border border-terminalAmber px-2 py-0.5">0 ACTIVE</span>
@@ -505,7 +509,7 @@
             </div>
 
             <!-- Transaction Log -->
-            <div class="bg-terminalDark border border-terminalBorder p-4 flex flex-col">
+            <div id="transactions-section" class="bg-terminalDark border border-terminalBorder p-4 flex flex-col">
                 <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
                     <h4 class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">DETAILED TRANSACTIONS HISTORY (BY CLOSE DATE)</h4>
                     <div class="flex items-center gap-2">
@@ -513,6 +517,61 @@
                         <button onclick="exportTransactionsPDF()" class="flex items-center gap-1.5 px-3 py-1.5 bg-terminalBlack border border-terminalBorder text-[10px] uppercase tracking-widest font-black text-terminalMuted hover:text-terminalText transition-all">
                             <i class="fa-solid fa-file-arrow-down text-[9px]"></i> EXPORT PDF
                         </button>
+                    </div>
+                </div>
+
+                <!-- Income Statement Summary -->
+                <div class="bg-terminalBlack border border-terminalBorder p-3 mb-3">
+                    <h5 class="text-[9px] font-black uppercase text-terminalAmber tracking-widest mb-2">INCOME STATEMENT SUMMARY</h5>
+                    <div class="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-12 gap-x-4 gap-y-1 text-[10px]">
+                        <div>
+                            <span class="text-terminalMuted uppercase">Trades:</span>
+                            <span id="income-total-trades" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Long:</span>
+                            <span id="income-long-trades" class="text-terminalGreen font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Short:</span>
+                            <span id="income-short-trades" class="text-terminalRed font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Volume:</span>
+                            <span id="income-total-volume" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Deposits:</span>
+                            <span id="income-deposits" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Withdrawals:</span>
+                            <span id="income-withdrawals" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Gains:</span>
+                            <span id="income-total-gains" class="text-terminalGreen font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Losses:</span>
+                            <span id="income-total-losses" class="text-terminalRed font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Net Profit:</span>
+                            <span id="income-net-profit" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Avg % Gain:</span>
+                            <span id="income-avg-gain" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Win Rate:</span>
+                            <span id="income-win-rate" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Profit Factor:</span>
+                            <span id="income-profit-factor" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
                     </div>
                 </div>
                 <div class="overflow-x-auto border border-terminalBorder flex-1 max-h-[300px]">
@@ -542,7 +601,7 @@
             </div>
 
             <!-- Institution Risk & Return Analytics -->
-            <div class="bg-terminalDark border border-terminalBorder p-4">
+            <div id="institution-section" class="bg-terminalDark border border-terminalBorder p-4">
                 <h4 class="text-[10px] font-black uppercase text-terminalMuted mb-4 tracking-widest">INSTITUTION RISK & RETURN ANALYTICS</h4>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-1">
                     <div class="metric-card"><p class="metric-label">ANNUALIZED CAGR</p><p id="stat-cagr" class="metric-value">-</p></div>
@@ -557,7 +616,7 @@
             </div>
 
             <!-- Risk Assessment -->
-            <div class="bg-terminalDark border border-terminalBorder p-4">
+            <div id="risk-assessment-section" class="bg-terminalDark border border-terminalBorder p-4">
                 <h4 class="text-[10px] font-black uppercase text-terminalMuted mb-4 tracking-widest">RISK ASSESSMENT</h4>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1">
                     <div class="metric-card"><p class="metric-label">PARAMETRIC VAR (95%)</p><p id="stat-var" class="metric-value">-</p></div>
@@ -587,7 +646,7 @@
             </div>
 
             <!-- Holding Period Distribution -->
-            <div class="bg-terminalDark border border-terminalBorder p-4">
+            <div id="holding-section" class="bg-terminalDark border border-terminalBorder p-4">
                 <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Holding Period Distribution</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 items-center">
                     <div class="h-[220px] sm:h-[320px] relative"><canvas id="durationChart"></canvas></div>
@@ -601,7 +660,7 @@
             </div>
 
             <!-- Temporal Attribution -->
-            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+            <div id="temporal-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
                 <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
                     <h4 class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em]">Temporal Return Attribution</h4>
                     <p class="text-[10px] text-terminalMuted uppercase tracking-widest">Basis: Close Timestamp (Local Sheet Time)</p>
@@ -619,7 +678,7 @@
             </div>
 
             <!-- Factor Attribution -->
-            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+            <div id="factor-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
                 <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Factor Type Attribution (Long / Short)</h4>
                 <div id="distribution-stats" class="flex justify-between items-end mb-4 sm:mb-6"></div>
                 <div class="h-[28px] relative w-full mb-8"><canvas id="attributionPieChart"></canvas></div>
@@ -640,7 +699,7 @@
             </div>
 
             <!-- Risk of Ruin -->
-            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6  overflow-hidden">
+            <div id="risk-ruin-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6  overflow-hidden">
                 <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Probability of Capital Depletion</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="overflow-x-auto">
@@ -689,8 +748,14 @@
             </div>
 
             <!-- Monte Carlo -->
-            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
-                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Monte Carlo Simulation</h4>
+            <div id="monte-carlo-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+                    <h4 class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em">Monte Carlo Simulation</h4>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="simulation-sims" placeholder="Sims" class="bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] px-3 py-1.5 w-20 focus:outline-none focus:border-terminalAmber" value="10000">
+                        <button onclick="runSimulation()" class="px-3 py-1.5 bg-terminalAmber text-terminalBlack text-[10px] uppercase tracking-widest font-black hover:bg-terminalText hover:text-terminalAmber transition-all">Simulate</button>
+                    </div>
+                </div>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     <div class="metric-card bg-white/[0.02] border-white/10"><p class="metric-label">Sims / Sample Size</p><div class="flex items-baseline gap-2"><p id="mc-sim-count" class="text-xl font-light">-</p><span class="text-terminalMuted text-xs">/</span><p id="mc-trade-count" class="text-xl font-light">-</p></div></div>
                     <div class="metric-card"><p class="metric-label">Median Final Return</p><p id="mc-median-ret" class="metric-value">-</p></div>
@@ -713,8 +778,8 @@
 
 
             <!-- Monthly Heatmap -->
-            <div class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
-                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em] flex items-center gap-2"><i class="fa-regular fa-calendar-days text-terminalGreen"></i> Monthly Return Sheet (%)</h4>
+            <div id="monthly-heatmap-section" class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Monthly Return Sheet (%)</h4>
                 <div class="overflow-x-auto">
                     <table class="monthly-table border-collapse border border-zinc-900">
                         <thead>
@@ -731,8 +796,8 @@
             </div>
 
             <!-- Max Drawdown Heatmap -->
-            <div class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
-                <h4 class="text-xs font-black uppercase text-terminalMuted mb-2 tracking-[0.3em] flex items-center gap-2"><i class="fa-solid fa-chart-line text-terminalRed"></i> Max Drawdown Heatmap (%)</h4>
+            <div id="drawdown-heatmap-section" class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-2 tracking-[0.3em]">Max Drawdown Heatmap (%)</h4>
                 <p class="text-[10px] text-terminalMuted uppercase tracking-widest mb-6">Deepest peak-to-valley drawdown reached during each period (High-Water Mark basis)</p>
                 <div class="overflow-x-auto">
                     <table class="monthly-table border-collapse border border-zinc-900">
@@ -750,8 +815,8 @@
             </div>
 
             <!-- Notional Exposure Matrix -->
-            <div class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
-                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em] flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-terminalCyan"></i> Notional Exposure Matrix (Lots)</h4>
+            <div id="notional-section" class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Notional Exposure Matrix (Lots)</h4>
                 <div class="overflow-x-auto">
                     <table class="monthly-table border-collapse border border-zinc-900">
                         <thead>
@@ -768,7 +833,7 @@
             </div>
 
             <!-- Commission Rebate Audit -->
-            <div class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+            <div id="rebate-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
                 <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Commission Rebate Audit</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="metric-card"><p class="metric-label">Total Cumulative Lots</p><p id="stat-total-lots" class="metric-value">-</p></div>
@@ -780,7 +845,7 @@
             </div><!-- /capture-area -->
 
             <!-- Monthly Report Generator -->
-            <div class="bg-terminalDark border border-terminalBorder p-3">
+            <div id="report-generator-section" class="bg-terminalDark border border-terminalBorder p-3">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-file-pdf text-terminalMuted text-sm"></i>
@@ -800,7 +865,7 @@
                 </div>
             </div>
 
-        <div class="flex justify-center py-10">
+        <div id="export-button-section" class="flex justify-center py-10">
             <button id="exportBtn" onclick="exportPDF()" class="px-6 py-3 sm:px-8 sm:py-4 bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] uppercase tracking-widest font-black hover:border-terminalAmber hover:text-terminalAmber transition-all flex items-center gap-2 sm:gap-3">
                 <i class="fa-solid fa-file-arrow-down text-sm"></i> EXPORT AUDIT PDF
             </button>
@@ -881,8 +946,14 @@
                     populateHistoryTable(processedList);
                     computeInstitutionMetrics(processedList, cachedTotalDeposits);
                 }
-                
-                // Note: Open trades will re-render automatically on next live update
+
+                // Refresh open positions to update unrealized P/L display
+                const metricEl = document.getElementById('metric-unrealized-pl');
+                if (metricEl && sharedUnrealizedGainPercent !== undefined) {
+                    const percentageDisplay = !isNaN(sharedUnrealizedGainPercent) ? `(${sharedUnrealizedGainPercent >= 0 ? '+' : ''}${sharedUnrealizedGainPercent.toFixed(2)}%)` : '';
+                    metricEl.textContent = financialPrivacyEnabled ? '$x.xx (x.xx%)' : `$${Math.abs(totalUnrealizedPL).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}${percentageDisplay}`;
+                    metricEl.className = `metric-value ${totalUnrealizedPL >= 0 ? 'val-pos' : 'val-neg'}`;
+                }
             }
 
             function formatFinancialValue(value, isCurrency = true) {
@@ -950,15 +1021,19 @@
                     currentUser = PIN_USERS[pinEntry];
                     updatePinDots('success');
                     setTimeout(() => {
+                        // Check privacy mode toggle
+                        const privacyToggle = document.getElementById('privacy-mode-toggle');
+                        financialPrivacyEnabled = privacyToggle.checked;
+
                         // Hide PIN keypad and show loading screen
                         const pinKeypadWrap = document.getElementById('pin-keypad-wrap');
                         const pinBrand = document.getElementById('pin-brand');
                         const loadingScreen = document.getElementById('loading-screen');
-                        
+
                         pinKeypadWrap.style.display = 'none';
                         pinBrand.style.display = 'none';
                         loadingScreen.style.display = 'flex';
-                        
+
                         // Load data and then show dashboard
                         setTimeout(() => {
                             continueToDashboard();
@@ -975,7 +1050,7 @@
                         pinEntry = '';
                         updatePinDots();
                         dots.classList.remove('pin-shake');
-                        hint.textContent = '';  
+                        hint.textContent = '';
                     }, 700);
                 }
             }
@@ -1099,8 +1174,19 @@
                 });
                 const bangkokInfo = getZoneInfo('Asia/Bangkok');
                 const bangkokText = document.getElementById('bangkok-text');
+                const bangkokIcon = document.getElementById('bangkok-icon');
+                const bangkokDate = document.getElementById('bangkok-date');
                 if (bangkokText) bangkokText.textContent = `Bangkok: ${bangkokInfo.time} (${bangkokInfo.offset})`;
                 const bangkokHour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone:'Asia/Bangkok' }).format(new Date()), 10);
+                if (bangkokIcon) {
+                    const isDay = bangkokHour >= 6 && bangkokHour < 18;
+                    bangkokIcon.textContent = isDay ? '☼' : '☾';
+                    bangkokIcon.className = isDay ? 'text-terminalAmber text-[14px]' : 'text-terminalMuted text-[14px]';
+                }
+                if (bangkokDate) {
+                    const dateOptions = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' };
+                    bangkokDate.textContent = new Intl.DateTimeFormat('en-US', dateOptions).format(new Date());
+                }
                 const greetingEl = document.getElementById('user-greeting');
                 if (greetingEl) greetingEl.textContent = getGreetingFromHour(bangkokHour, currentUser || 'PONGSAKORN');
             }
@@ -1554,6 +1640,7 @@
                         row.className = "hover:bg-terminalPanel transition-colors";
                         const typeLabel = t.type.toLowerCase().includes('buy') ? 'LONG' : t.type.toLowerCase().includes('sell') ? 'SHORT' : t.type;
                         const typeColor = t.type.toLowerCase().includes('buy') ? 'text-terminalGreen' : 'text-terminalRed';
+                        const profitDisplay = financialPrivacyEnabled ? '$x.xx' : `${t.profit >= 0 ? '+' : ''}$${t.profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
                         row.innerHTML = `
                             <td class="px-4 py-2 text-terminalMuted font-mono text-[11px] col-open-time">${t.time}</td>
                             <td class="px-4 py-2 text-terminalText font-bold col-symbol">${t.symbol}</td>
@@ -1566,7 +1653,7 @@
                             <td class="px-4 py-2 text-right font-bold ${gainPercent >= 0 ? 'text-terminalGreen' : 'text-terminalRed'} col-gain">${gainDisplay}</td>
                             <td class="px-4 py-2 text-right text-zinc-400 font-mono text-[11px] col-commission">$${parseFloat(t.commission || 0).toFixed(2)}</td>
                             <td class="px-4 py-2 text-right text-zinc-400 font-mono text-[11px] col-swap">$${parseFloat(t.swap || 0).toFixed(2)}</td>
-                            <td class="px-4 py-2 text-right font-bold ${t.profit >= 0 ? 'text-terminalGreen' : 'text-terminalRed'} col-profit">${t.profit >= 0 ? '+' : ''}$${t.profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                            <td class="px-4 py-2 text-right font-bold ${t.profit >= 0 ? 'text-terminalGreen' : 'text-terminalRed'} col-profit">${profitDisplay}</td>
                             <td class="px-4 py-2 text-right font-mono text-[11px] col-holding">${holdingText}</td>
                         `;
                         tbody.appendChild(row);
@@ -1575,14 +1662,15 @@
                     const totalGainPercent = (!isNaN(latestPortfolioBalance) && latestPortfolioBalance !== 0) ? (totalUnrealized / latestPortfolioBalance) * 100 : NaN;
                     const totalGainDisplay = !isNaN(totalGainPercent) ? `${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%` : '—';
                     if (metricEl) {
-                        const plText = !isNaN(totalGainPercent)
-                            ? `${(totalUnrealized >= 0 ? '+' : '-')}$${Math.abs(totalUnrealized).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} (${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%)`
-                            : `${(totalUnrealized >= 0 ? '+' : '-')}$${Math.abs(totalUnrealized).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                        const plText = financialPrivacyEnabled ? '$x.xx (x.xx%)' : (!isNaN(totalGainPercent)
+                            ? `$${Math.abs(totalUnrealized).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} (${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%)`
+                            : `$${Math.abs(totalUnrealized).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`);
                         metricEl.textContent = plText;
                     }
 
                     const summaryRow = document.createElement('tr');
                     summaryRow.className = "bg-zinc-900/80 text-terminalText font-semibold border-t border-terminalBorder";
+                    const totalUnrealizedDisplay = financialPrivacyEnabled ? '$x.xx (x.xx%)' : `$${Math.abs(totalUnrealized).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${totalGainDisplay}`;
                     summaryRow.innerHTML = `
                         <td class="px-4 py-3 text-terminalText" colspan="3">Open Position Summary</td>
                         <td class="px-4 py-3 text-right font-mono text-[11px]">${totalVolume > 0 ? totalVolume.toFixed(2) : '—'}</td>
@@ -1590,7 +1678,7 @@
                         <td class="px-4 py-3 text-right font-bold ${totalGainPercent >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}">${totalGainDisplay}</td>
                         <td class="px-4 py-3 text-right font-mono text-[11px]">$${totalCommission.toFixed(2)}</td>
                         <td class="px-4 py-3 text-right font-mono text-[11px]">$${totalSwap.toFixed(2)}</td>
-                        <td class="px-4 py-3 text-right font-bold ${totalUnrealized >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}">${totalUnrealized >= 0 ? '+' : ''}$${totalUnrealized.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                        <td class="px-4 py-3 text-right font-bold ${totalUnrealized >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}">${totalUnrealizedDisplay}</td>
                         <td class="px-4 py-3"></td>
                     `;
                     tbody.appendChild(summaryRow);
@@ -1688,7 +1776,37 @@
                 dateFilterTo = null;
                 document.getElementById('date-from').value = '';
                 document.getElementById('date-to').value = '';
-                
+
+                // Hide all sections except overview sections
+                const sectionsToHide = [
+                    'institution-section',
+                    'risk-assessment-section',
+                    'holding-section',
+                    'temporal-section',
+                    'factor-section',
+                    'risk-ruin-section',
+                    'monte-carlo-section',
+                    'monthly-heatmap-section',
+                    'drawdown-heatmap-section',
+                    'notional-section',
+                    'rebate-section',
+                    'report-generator-section',
+                    'export-button-section',
+                    'transactions-section'
+                ];
+
+                sectionsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
+                // Show overview sections
+                const overviewSections = ['metrics-section', 'chart-section', 'open-trades-section'];
+                overviewSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = '';
+                });
+
                 // Reset to full data
                 filteredProcessedList = [...processedList];
                 updateDashboardMetrics(filteredProcessedList, cachedTotalDeposits, cachedTotalWithdrawals);
@@ -1698,6 +1816,115 @@
                 populateHistoryTable(filteredProcessedList);
                 renderChart(filteredProcessedList);
                 computeInstitutionMetrics(filteredProcessedList, cachedTotalDeposits);
+
+                // Scroll to top for home experience
+                document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function scrollToTransactions() {
+                // Hide all sections except transactions, holding period, factor attribution, monthly heatmap, and notional exposure
+                const sectionsToHide = [
+                    'metrics-section',
+                    'chart-section',
+                    'open-trades-section',
+                    'institution-section',
+                    'risk-assessment-section',
+                    'temporal-section',
+                    'risk-ruin-section',
+                    'monte-carlo-section',
+                    'drawdown-heatmap-section',
+                    'rebate-section',
+                    'report-generator-section',
+                    'export-button-section'
+                ];
+
+                sectionsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
+                // Show portfolio sections
+                const portfolioSections = ['transactions-section', 'holding-section', 'factor-section', 'monthly-heatmap-section', 'notional-section'];
+                portfolioSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = '';
+                });
+
+                // Scroll to transactions section
+                const transactionsSection = document.getElementById('transactions-section');
+                if (transactionsSection) {
+                    transactionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            function scrollToRisk() {
+                // Hide all sections except risk-related sections
+                const sectionsToHide = [
+                    'metrics-section',
+                    'chart-section',
+                    'open-trades-section',
+                    'holding-section',
+                    'factor-section',
+                    'monthly-heatmap-section',
+                    'notional-section',
+                    'rebate-section',
+                    'report-generator-section',
+                    'export-button-section',
+                    'transactions-section',
+                    'monte-carlo-section'
+                ];
+
+                sectionsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
+                // Show risk sections
+                const riskSections = ['institution-section', 'risk-assessment-section', 'temporal-section', 'risk-ruin-section', 'drawdown-heatmap-section'];
+                riskSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = '';
+                });
+
+                // Scroll to first risk section
+                const riskSection = document.getElementById('institution-section');
+                if (riskSection) {
+                    riskSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            function scrollToSimulation() {
+                // Hide all sections except simulation section
+                const sectionsToHide = [
+                    'metrics-section',
+                    'chart-section',
+                    'open-trades-section',
+                    'institution-section',
+                    'risk-assessment-section',
+                    'holding-section',
+                    'temporal-section',
+                    'factor-section',
+                    'risk-ruin-section',
+                    'monthly-heatmap-section',
+                    'drawdown-heatmap-section',
+                    'notional-section',
+                    'rebate-section',
+                    'report-generator-section',
+                    'export-button-section',
+                    'transactions-section'
+                ];
+
+                sectionsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
+                // Show monte carlo section
+                const monteCarloSection = document.getElementById('monte-carlo-section');
+                if (monteCarloSection) {
+                    monteCarloSection.style.display = '';
+                    monteCarloSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             }
             
             function filterByDateRange() {
@@ -2511,7 +2738,7 @@
                 const tbody = document.getElementById('transaction-rows');
                 const countEl = document.getElementById('history-count');
                 tbody.innerHTML = '';
-                
+
                 // Use filtered list if date filter is enabled
                 const effectiveList = dateFilterEnabled ? filteredProcessedList : list;
                 // When date filter is enabled (specific period), already filtered to exclude funding
@@ -2519,6 +2746,21 @@
                 countEl.textContent = `${effectiveList.length} Entries`;
                 const displayList = [...effectiveList].reverse();
                 if (displayList.length === 0) { tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-terminalMuted font-sans">Awaiting data records...</td></tr>`; return; }
+
+                // Calculate income statement metrics
+                let totalVolume = 0;
+                let totalGains = 0;
+                let totalLosses = 0;
+                let netProfit = 0;
+                let winningTrades = 0;
+                let losingTrades = 0;
+                let totalTrades = 0;
+                let longTrades = 0;
+                let shortTrades = 0;
+                let totalDeposits = 0;
+                let totalWithdrawals = 0;
+                let totalGainPercent = 0;
+                let tradeCountForAvg = 0;
 
                 displayList.forEach(item => {
                     const isFunding = item.isFunding;
@@ -2548,6 +2790,39 @@
                     let tradeGainText = '-';
                     if (!isFunding) tradeGainText = `${item.profit >= 0 ? '+' : ''}${item.tradeReturnPercent.toFixed(2)}%`;
 
+                    // Calculate income statement metrics (only for trades, not funding)
+                    if (!isFunding) {
+                        totalVolume += item.volume || 0;
+                        totalTrades++;
+                        
+                        // Count long/short trades
+                        const tType = (item.type || '').toLowerCase();
+                        if (tType.includes('buy') || tType.includes('long')) longTrades++;
+                        else if (tType.includes('sell') || tType.includes('short')) shortTrades++;
+                        
+                        if (item.profit > 0) {
+                            totalGains += item.profit;
+                            winningTrades++;
+                        } else if (item.profit < 0) {
+                            totalLosses += Math.abs(item.profit);
+                            losingTrades++;
+                        }
+                        netProfit += item.profit;
+                        
+                        // Accumulate gain percentage for average
+                        if (item.tradeReturnPercent !== undefined) {
+                            totalGainPercent += item.tradeReturnPercent;
+                            tradeCountForAvg++;
+                        }
+                    } else {
+                        // Calculate deposits and withdrawals
+                        if (item.profit > 0) {
+                            totalDeposits += item.profit;
+                        } else {
+                            totalWithdrawals += Math.abs(item.profit);
+                        }
+                    }
+
                     const row = document.createElement('tr');
                     row.className = "hover:bg-terminalPanel transition-colors";
                     row.innerHTML = `
@@ -2567,6 +2842,27 @@
                     `;
                     tbody.appendChild(row);
                 });
+
+                // Update income statement summary
+                const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100).toFixed(1) : '0.0';
+                const profitFactor = totalLosses > 0 ? (totalGains / totalLosses).toFixed(2) : (totalGains > 0 ? '∞' : '0.00');
+                const avgGainPercent = tradeCountForAvg > 0 ? (totalGainPercent / tradeCountForAvg).toFixed(2) : '0.00';
+
+                document.getElementById('income-total-trades').textContent = totalTrades;
+                document.getElementById('income-long-trades').textContent = longTrades;
+                document.getElementById('income-short-trades').textContent = shortTrades;
+                document.getElementById('income-deposits').textContent = `$${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                document.getElementById('income-withdrawals').textContent = `$${totalWithdrawals.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                document.getElementById('income-avg-gain').textContent = `${avgGainPercent}%`;
+                document.getElementById('income-avg-gain').className = `font-bold ${avgGainPercent >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}`;
+
+                document.getElementById('income-total-volume').textContent = totalVolume.toFixed(2);
+                document.getElementById('income-total-gains').textContent = `+$${totalGains.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                document.getElementById('income-total-losses').textContent = `-$${totalLosses.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                document.getElementById('income-net-profit').textContent = `${netProfit >= 0 ? '+' : ''}$${netProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                document.getElementById('income-net-profit').className = `font-bold ${netProfit >= 0 ? 'text-terminalGreen' : 'text-terminalRed'}`;
+                document.getElementById('income-win-rate').textContent = `${winRate}%`;
+                document.getElementById('income-profit-factor').textContent = profitFactor;
             }
 
             // ============================================================
@@ -2650,8 +2946,8 @@
                 const btnChart = document.getElementById('btn-view-chart');
                 const btnNews = document.getElementById('btn-view-news');
 
-                const activeCls = "px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white flex items-center gap-1.5";
-                const inactiveCls = "px-3 py-1 text-xs rounded font-bold transition-all text-terminalMuted hover:text-terminalText flex items-center gap-1.5";
+                const activeCls = "px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber";
+                const inactiveCls = "px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText";
 
                 if (view === 'news') {
                     chartView.classList.add('hidden');
@@ -2678,8 +2974,8 @@
                 activeChartType = type;
                 const btnGain = document.getElementById('btn-chart-gain');
                 const btnBal = document.getElementById('btn-chart-balance');
-                if (type === 'gain') { btnGain.className = "px-3 py-1 text-xs rounded font-medium transition-all bg-emerald-600 text-white shadow"; btnBal.className = "px-3 py-1 text-xs rounded font-medium transition-all text-terminalMuted hover:text-terminalText"; }
-                else { btnBal.className = "px-3 py-1 text-xs rounded font-medium transition-all bg-emerald-600 text-white shadow"; btnGain.className = "px-3 py-1 text-xs rounded font-medium transition-all text-terminalMuted hover:text-terminalText"; }
+                if (type === 'gain') { btnGain.className = "px-2 py-1 text-[10px] font-bold transition-all bg-terminalAmber text-terminalBlack"; btnBal.className = "px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText"; }
+                else { btnBal.className = "px-2 py-1 text-[10px] font-bold transition-all bg-terminalAmber text-terminalBlack"; btnGain.className = "px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText"; }
                 if (processedList.length > 0) renderChart(processedList);
             }
             function changePeriodMode(mode) {
@@ -2687,7 +2983,7 @@
                 isFirstDrawdownRender = true; // re-animate drawdown on period change
                 ['trade','daily','monthly','yearly'].forEach(btn => {
                     const el = document.getElementById(`btn-period-${btn}`);
-                    el.className = btn === mode ? "px-3 py-1 text-xs rounded font-bold transition-all bg-zinc-700 text-white" : "px-3 py-1 text-xs rounded font-bold transition-all text-terminalMuted hover:text-terminalText";
+                    el.className = btn === mode ? "px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber" : "px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText";
                 });
                 if (processedList.length > 0) renderChart(processedList);
             }
@@ -3163,7 +3459,7 @@
                 if (durationChartInstance) durationChartInstance.destroy();
                 durationChartInstance = new Chart(ctx, {
                     type: 'scatter',
-                    data: { datasets: [{ data: trades.map(t => ({x:t.duration, y:t.returnPct})), backgroundColor: trades.map(t => t.profit >= 0 ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'), borderColor:'transparent', pointRadius:4, hoverRadius:8 }] },
+                    data: { datasets: [{ data: trades.map(t => ({x:t.duration, y:t.returnPct})), backgroundColor: trades.map(t => t.profit >= 0 ? 'rgba(0,200,83,0.4)' : 'rgba(255,69,69,0.4)'), borderColor:'transparent', pointRadius:4, hoverRadius:8 }] },
                     options: {
                         responsive:true, maintainAspectRatio:false,
                         plugins: { legend:{ display:false }, tooltip:{ backgroundColor:'rgba(0,0,0,0.9)', padding:12, callbacks:{ label:(c)=>[`Excess Return: ${c.parsed.y.toFixed(2)}%`, `Duration: ${formatDurationMinutes(c.parsed.x)}`] } } },
@@ -3246,8 +3542,8 @@
                 attributionChartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: { labels: ['Distribution'], datasets: [
-                        { label:'LONG', data:[totalBuy], backgroundColor:'#00C853', barThickness:24, borderRadius:{topLeft:50,bottomLeft:50}, borderSkipped:false },
-                        { label:'SHORT', data:[totalSell], backgroundColor:'#FF4545', barThickness:24, borderRadius:{topRight:50,bottomRight:50}, borderSkipped:false }
+                        { label:'LONG', data:[totalBuy], backgroundColor:'#00C853', barThickness:24, borderRadius:0 },
+                        { label:'SHORT', data:[totalSell], backgroundColor:'#FF4545', barThickness:24, borderRadius:0 }
                     ] },
                     options: {
                         indexAxis:'y', responsive:true, maintainAspectRatio:false,
@@ -3345,70 +3641,127 @@
             // ============================================================
             // MONTE CARLO SIMULATION
             // ============================================================
-            function runMonteCarlo(trades, initialDeposit) {
-                if (trades.length === 0) return;
-                const numSims = 10000;
-                const numTrades = trades.length;
-                const finalReturns = [], maxDrawdowns = [], maxStagnations = [];
-                let ruinCount = 0, profitableRuns = 0;
-                const stepDistributions = Array.from({length: numTrades + 1}, () => []);
+            function runSimulation() {
+                const numSims = parseInt(document.getElementById('simulation-sims').value);
+                const initialDeposit = 10000; // Fixed at 10000
+                
+                if (isNaN(numSims) || numSims <= 0) {
+                    alert('Please enter a valid number of simulations');
+                    return;
+                }
 
-                for (let i = 0; i < numSims; i++) {
-                    let balance = initialDeposit, runningMax = initialDeposit, maxDD = 0, currentStagnation = 0, maxStagnation = 0;
-                    stepDistributions[0].push(0);
-                    for (let j = 0; j < numTrades; j++) {
-                        const randomTrade = trades[Math.floor(Math.random() * numTrades)];
-                        // Proper compound gain: multiply by (1 + return percentage)
-                        balance = balance * (1 + randomTrade.returnPct / 100);
-                        if (balance > runningMax) runningMax = balance;
-                        if (balance <= 0) { balance = 0; maxDD = 100; break; }
-                        const dd = ((runningMax - balance) / runningMax) * 100;
-                        if (dd > maxDD) maxDD = dd;
-                        // Track stagnation (consecutive trades below running max)
-                        if (balance < runningMax) {
-                            currentStagnation++;
-                        } else {
-                            currentStagnation = 0;
-                        }
-                        maxStagnation = Math.max(maxStagnation, currentStagnation);
-                        stepDistributions[j+1].push(((balance - initialDeposit) / initialDeposit) * 100);
+                console.log('Starting simulation with', numSims, 'sims and fixed deposit:', initialDeposit);
+
+                // Get trades from current data
+                const effectiveList = dateFilterEnabled ? filteredProcessedList : processedList;
+                const trades = effectiveList.filter(item => !item.isFunding && item.profit !== undefined);
+
+                console.log('Total trades found:', trades.length);
+
+                if (trades.length === 0) {
+                    alert('No trade data available for simulation');
+                    return;
+                }
+
+                // Calculate return percentage for each trade if not present
+                const tradesWithReturn = trades.map(item => {
+                    if (item.tradeReturnPercent !== undefined) {
+                        return { ...item, returnPct: item.tradeReturnPercent };
+                    } else if (item.profit !== undefined && item.openPrice !== undefined && item.closePrice !== undefined) {
+                        // Calculate return percentage from prices
+                        const returnPct = ((item.closePrice - item.openPrice) / item.openPrice) * 100;
+                        return { ...item, returnPct };
+                    } else {
+                        // Fallback: estimate from profit relative to a base (this is approximate)
+                        const returnPct = (item.profit / initialDeposit) * 100;
+                        return { ...item, returnPct };
                     }
-                    const totalReturnPct = ((balance - initialDeposit) / initialDeposit) * 100;
-                    finalReturns.push(totalReturnPct);
-                    maxDrawdowns.push(maxDD);
-                    maxStagnations.push(maxStagnation);
-                    if (maxDD >= 99.9) ruinCount++;
-                    if (totalReturnPct > 0) profitableRuns++;
+                });
+
+                console.log('Trades with return:', tradesWithReturn.length);
+
+                // Run Monte Carlo with the fixed deposit and custom number of simulations
+                runMonteCarlo(tradesWithReturn, initialDeposit, numSims);
+            }
+
+            function runMonteCarlo(trades, initialDeposit, numSims = 10000) {
+                try {
+                    console.log('Running Monte Carlo with', trades.length, 'trades, initial deposit:', initialDeposit, 'and', numSims, 'simulations');
+
+                    if (trades.length === 0) {
+                        console.error('No trades to simulate');
+                        return;
+                    }
+
+                    const numTrades = trades.length;
+                    const finalReturns = [], maxDrawdowns = [], maxStagnations = [];
+                    let ruinCount = 0, profitableRuns = 0;
+                    const stepDistributions = Array.from({length: numTrades + 1}, () => []);
+
+                    for (let i = 0; i < numSims; i++) {
+                        let balance = initialDeposit, runningMax = initialDeposit, maxDD = 0, currentStagnation = 0, maxStagnation = 0;
+                        stepDistributions[0].push(0);
+                        for (let j = 0; j < numTrades; j++) {
+                            const randomTrade = trades[Math.floor(Math.random() * numTrades)];
+                            // Proper compound gain: multiply by (1 + return percentage)
+                            balance = balance * (1 + randomTrade.returnPct / 100);
+                            if (balance > runningMax) runningMax = balance;
+                            if (balance <= 0) { balance = 0; maxDD = 100; break; }
+                            const dd = ((runningMax - balance) / runningMax) * 100;
+                            if (dd > maxDD) maxDD = dd;
+                            // Track stagnation (consecutive trades below running max)
+                            if (balance < runningMax) {
+                                currentStagnation++;
+                            } else {
+                                currentStagnation = 0;
+                            }
+                            maxStagnation = Math.max(maxStagnation, currentStagnation);
+                            stepDistributions[j+1].push(((balance - initialDeposit) / initialDeposit) * 100);
+                        }
+                        const totalReturnPct = ((balance - initialDeposit) / initialDeposit) * 100;
+                        finalReturns.push(totalReturnPct);
+                        maxDrawdowns.push(maxDD);
+                        maxStagnations.push(maxStagnation);
+                        if (maxDD >= 99.9) ruinCount++;
+                        if (totalReturnPct > 0) profitableRuns++;
+                    }
+
+                    const p5Path = [], p50Path = [], p95Path = [];
+                    for (let j = 0; j <= numTrades; j++) {
+                        const values = stepDistributions[j].sort((a,b)=>a-b);
+                        p5Path.push(values[Math.floor(numSims*0.05)]);
+                        p50Path.push(values[Math.floor(numSims*0.50)]);
+                        p95Path.push(values[Math.floor(numSims*0.95)]);
+                    }
+
+                    finalReturns.sort((a,b)=>a-b);
+                    maxDrawdowns.sort((a,b)=>a-b);
+                    maxStagnations.sort((a,b)=>a-b);
+
+                    const medianReturn = finalReturns[Math.floor(numSims*0.5)];
+                    const worstReturn = finalReturns[Math.floor(numSims*0.05)];
+                    const bestReturn = finalReturns[Math.floor(numSims*0.95)];
+                    const medianDD = maxDrawdowns[Math.floor(numSims*0.5)];
+                    const worstDD = maxDrawdowns[Math.floor(numSims*0.95)];
+                    const medianStagnation = maxStagnations[Math.floor(numSims*0.5)];
+                    const p95Stagnation = maxStagnations[Math.floor(numSims*0.95)];
+                    const probProfit = (profitableRuns / numSims) * 100;
+                    const bankruptcyRisk = (ruinCount / numSims) * 100;
+                    const robustScore = Math.min(999, medianReturn / (worstDD || 1));
+
+                    console.log('Simulation complete. Updating UI...');
+
+                    document.getElementById('mc-sim-count').innerText = numSims.toLocaleString();
+                    document.getElementById('mc-trade-count').innerText = numTrades.toLocaleString();
+
+                    updateMonteCarloUI(medianReturn, worstReturn, bestReturn, medianDD, worstDD, medianStagnation, p95Stagnation, probProfit, bankruptcyRisk, robustScore);
+                    renderMonteCarloChart(p5Path, p50Path, p95Path, numTrades);
+
+                    console.log('Monte Carlo simulation finished successfully');
+                } catch (error) {
+                    console.error('Error in Monte Carlo simulation:', error);
+                    alert('Error running simulation: ' + error.message);
                 }
-
-                const p5Path = [], p50Path = [], p95Path = [];
-                for (let j = 0; j <= numTrades; j++) {
-                    const values = stepDistributions[j].sort((a,b)=>a-b);
-                    p5Path.push(values[Math.floor(numSims*0.05)]);
-                    p50Path.push(values[Math.floor(numSims*0.50)]);
-                    p95Path.push(values[Math.floor(numSims*0.95)]);
-                }
-
-                finalReturns.sort((a,b)=>a-b);
-                maxDrawdowns.sort((a,b)=>a-b);
-                maxStagnations.sort((a,b)=>a-b);
-
-                const medianReturn = finalReturns[Math.floor(numSims*0.5)];
-                const worstReturn = finalReturns[Math.floor(numSims*0.05)];
-                const bestReturn = finalReturns[Math.floor(numSims*0.95)];
-                const medianDD = maxDrawdowns[Math.floor(numSims*0.5)];
-                const worstDD = maxDrawdowns[Math.floor(numSims*0.95)];
-                const medianStagnation = maxStagnations[Math.floor(numSims*0.5)];
-                const p95Stagnation = maxStagnations[Math.floor(numSims*0.95)];
-                const probProfit = (profitableRuns / numSims) * 100;
-                const bankruptcyRisk = (ruinCount / numSims) * 100;
-                const robustScore = Math.min(999, medianReturn / (worstDD || 1));
-
-                document.getElementById('mc-sim-count').innerText = numSims.toLocaleString();
-                document.getElementById('mc-trade-count').innerText = numTrades.toLocaleString();
-
-                updateMonteCarloUI(medianReturn, worstReturn, bestReturn, medianDD, worstDD, medianStagnation, p95Stagnation, probProfit, bankruptcyRisk, robustScore);
-                renderMonteCarloChart(p5Path, p50Path, p95Path, numTrades);
             }
 
             function updateMonteCarloUI(medianReturn, worstReturn, bestReturn, medianDD, worstDD, stagnation, p95Stag, probProfit, ruin, robust) {
@@ -4260,30 +4613,66 @@
                         return;
                     }
 
-                    // Calculate summary statistics
+                    // Calculate summary statistics - same logic as income statement
                     console.log('Calculating summary statistics...');
-                    const totalTrades = processedList.filter(item => !item.isFunding).length;
-                    const totalFunding = processedList.filter(item => item.isFunding).length;
-                    const totalProfit = processedList.reduce((sum, item) => sum + item.profit, 0);
-                    const totalCommission = processedList.reduce((sum, item) => sum + (item.commission || 0), 0);
-                    const totalSwap = processedList.reduce((sum, item) => sum + (item.swap || 0), 0);
-                    const winningTrades = processedList.filter(item => !item.isFunding && item.profit > 0).length;
-                    const losingTrades = processedList.filter(item => !item.isFunding && item.profit < 0).length;
-                    const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100).toFixed(2) : 0;
+                    const effectiveList = dateFilterEnabled ? filteredProcessedList : processedList;
+                    const tradeList = effectiveList.filter(item => !item.isFunding);
+
+                    let pdfTotalVolume = 0;
+                    let pdfTotalGains = 0;
+                    let pdfTotalLosses = 0;
+                    let pdfNetProfit = 0;
+                    let pdfWinningTrades = 0;
+                    let pdfLosingTrades = 0;
+                    let pdfTotalTrades = 0;
+                    let pdfLongTrades = 0;
+                    let pdfShortTrades = 0;
+                    let pdfTotalDeposits = 0;
+                    let pdfTotalWithdrawals = 0;
+                    let pdfTotalGainPercent = 0;
+                    let pdfTradeCountForAvg = 0;
                     
-                    // Calculate total deposits
-                    const totalDeposits = processedList.reduce((sum, item) => {
-                        if (item.isFunding && item.profit > 0) return sum + item.profit;
-                        return sum;
-                    }, 0);
-                    
-                    // Calculate winning and losing trade lists for accurate metrics
-                    const winningTradeList = processedList.filter(item => !item.isFunding && item.profit > 0);
-                    const losingTradeList = processedList.filter(item => !item.isFunding && item.profit < 0);
-                    
+                    tradeList.forEach(item => {
+                        pdfTotalVolume += item.volume || 0;
+                        pdfTotalTrades++;
+
+                        const tType = (item.type || '').toLowerCase();
+                        if (tType.includes('buy') || tType.includes('long')) pdfLongTrades++;
+                        else if (tType.includes('sell') || tType.includes('short')) pdfShortTrades++;
+
+                        if (item.profit > 0) {
+                            pdfTotalGains += item.profit;
+                            pdfWinningTrades++;
+                        } else if (item.profit < 0) {
+                            pdfTotalLosses += Math.abs(item.profit);
+                            pdfLosingTrades++;
+                        }
+                        pdfNetProfit += item.profit;
+
+                        if (item.tradeReturnPercent !== undefined) {
+                            pdfTotalGainPercent += item.tradeReturnPercent;
+                            pdfTradeCountForAvg++;
+                        }
+                    });
+
+                    // Calculate deposits and withdrawals from funding transactions
+                    effectiveList.forEach(item => {
+                        if (item.isFunding) {
+                            if (item.profit > 0) {
+                                pdfTotalDeposits += item.profit;
+                            } else {
+                                pdfTotalWithdrawals += Math.abs(item.profit);
+                            }
+                        }
+                    });
+
+                    const totalCommission = tradeList.reduce((sum, item) => sum + (item.commission || 0), 0);
+                    const totalSwap = tradeList.reduce((sum, item) => sum + (item.swap || 0), 0);
+                    const winRate = pdfTotalTrades > 0 ? (pdfWinningTrades / pdfTotalTrades * 100).toFixed(2) : 0;
+
                     // Calculate Sharpe Ratio
                     const ANNUAL_RISK_FREE_RATE = 2.0; // 2% annual risk-free rate
-                    const tradeReturns = processedList.filter(item => !item.isFunding && item.tradeReturnPercent !== undefined).map(item => item.tradeReturnPercent / 100);
+                    const tradeReturns = tradeList.filter(item => item.tradeReturnPercent !== undefined).map(item => item.tradeReturnPercent / 100);
                     let sharpeRatio = 0;
                     if (tradeReturns.length > 1) {
                         const avgReturn = tradeReturns.reduce((a, b) => a + b, 0) / tradeReturns.length;
@@ -4458,11 +4847,11 @@
                 // Trading metrics in 3-column grid
                 const tradeMetrics = [
                     { label: 'Win Rate', value: `${winRate}%` },
-                    { label: 'Total Transactions', value: totalTrades.toString() },
-                    { label: 'Winning Trades', value: winningTrades.toString() },
-                    { label: 'Losing Trades', value: losingTrades.toString() },
-                    { label: 'Profit Factor', value: winningTradeList.length > 0 && losingTradeList.length > 0 ? (winningTradeList.reduce((sum, t) => sum + t.profit, 0) / Math.abs(losingTradeList.reduce((sum, t) => sum + t.profit, 0))).toFixed(2) : '—' },
-                    { label: 'Average Trade', value: totalTrades > 0 ? `$${(totalProfit / totalTrades).toFixed(2)}` : '—' }
+                    { label: 'Total Transactions', value: pdfTotalTrades.toString() },
+                    { label: 'Winning Trades', value: pdfWinningTrades.toString() },
+                    { label: 'Losing Trades', value: pdfLosingTrades.toString() },
+                    { label: 'Profit Factor', value: (pdfTotalLosses > 0 ? (pdfTotalGains / pdfTotalLosses).toFixed(2) : (pdfTotalGains > 0 ? '∞' : '0.00')) },
+                    { label: 'Average Trade', value: pdfTotalTrades > 0 ? `$${(pdfNetProfit / pdfTotalTrades).toFixed(2)}` : '—' }
                 ];
                 
                 tradeMetrics.forEach((metric, index) => {
@@ -4491,21 +4880,30 @@
                 pdf.text('Financial Summary', margin, yPos);
                 yPos += 8;
                 
-                // Financial metrics in 3-column grid
+                // Financial metrics in 3-column grid - matching income statement summary
+                const avgGainPercent = pdfTradeCountForAvg > 0 ? (pdfTotalGainPercent / pdfTradeCountForAvg).toFixed(2) : '0.00';
+                const netProfitAfterCosts = pdfNetProfit - totalCommission - totalSwap;
+
                 const finMetrics = [
-                    { label: 'Gross P/L', value: `$${totalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
-                    { label: 'Total Commission', value: `$${totalCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
-                    { label: 'Total Swap Fees', value: `$${totalSwap.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
-                    { label: 'Net P/L (After Costs)', value: `$${(totalProfit - totalCommission - totalSwap).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
-                    { label: 'ROI', value: totalDeposits > 0 ? `${((totalProfit / totalDeposits) * 100).toFixed(2)}%` : '—' },
-                    { label: 'Average Daily Return', value: totalTrades > 0 ? `${((totalProfit / totalTrades) * 100).toFixed(2)}%` : '—' }
+                    { label: 'Total Trades', value: pdfTotalTrades.toString() },
+                    { label: 'Long Trades', value: pdfLongTrades.toString() },
+                    { label: 'Short Trades', value: pdfShortTrades.toString() },
+                    { label: 'Total Volume', value: pdfTotalVolume.toFixed(2) },
+                    { label: 'Deposits', value: `$${pdfTotalDeposits.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
+                    { label: 'Withdrawals', value: `$${pdfTotalWithdrawals.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
+                    { label: 'Total Gains', value: `+$${pdfTotalGains.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
+                    { label: 'Total Losses', value: `-$${pdfTotalLosses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
+                    { label: 'Net Profit', value: `${pdfNetProfit >= 0 ? '+' : ''}$${pdfNetProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
+                    { label: 'Avg % Gain', value: `${avgGainPercent}%` },
+                    { label: 'Win Rate', value: `${winRate}%` },
+                    { label: 'Profit Factor', value: (pdfTotalLosses > 0 ? (pdfTotalGains / pdfTotalLosses).toFixed(2) : (pdfTotalGains > 0 ? '∞' : '0.00')) }
                 ];
                 
                 finMetrics.forEach((metric, index) => {
-                    const col = index % 3;
-                    const row = Math.floor(index / 3);
-                    const x = margin + (col * perfColWidth);
-                    const y = yPos + (row * 14);
+                    const col = index % 4;
+                    const row = Math.floor(index / 4);
+                    const x = margin + (col * (contentWidth / 4));
+                    const y = yPos + (row * 12);
                     
                     pdf.setFont('helvetica', 'bold');
                     pdf.setFontSize(7);
@@ -4532,9 +4930,9 @@
                 pdf.setTextColor(60, 60, 60);
                 pdf.text(`Total Recorded Transactions: ${processedList.length}`, margin, yPos);
                 yPos += 8;
-                pdf.text(`Trading Operations: ${totalTrades}`, margin, yPos);
+                pdf.text(`Trading Operations: ${pdfTotalTrades}`, margin, yPos);
                 yPos += 8;
-                pdf.text(`Capital Movements (Deposits/Withdrawals): ${totalFunding}`, margin, yPos);
+                pdf.text(`Capital Movements (Deposits/Withdrawals): ${effectiveList.filter(item => item.isFunding).length}`, margin, yPos);
                 yPos += 8;
                 pdf.text(`Current Open Positions: ${currentOpenTrades.length}`, margin, yPos);
                 
@@ -4551,8 +4949,8 @@
                 const riskColWidth = contentWidth / 3;
                 
                 // Calculate average win and loss properly
-                const avgWin = winningTradeList.length > 0 ? winningTradeList.reduce((sum, t) => sum + t.profit, 0) / winningTradeList.length : 0;
-                const avgLoss = losingTradeList.length > 0 ? losingTradeList.reduce((sum, t) => sum + t.profit, 0) / losingTradeList.length : 0;
+                const avgWin = pdfWinningTrades > 0 ? (pdfTotalGains / pdfWinningTrades) : 0;
+                const avgLoss = pdfLosingTrades > 0 ? (pdfTotalLosses / pdfLosingTrades) : 0;
                 
                 console.log('Sharpe Ratio calculated:', sharpeRatio);
                 
@@ -4560,8 +4958,8 @@
                     { label: 'Maximum Drawdown', value: maxDrawdown },
                     { label: 'Current Drawdown', value: currentDrawdown },
                     { label: 'Sharpe Ratio', value: sharpeRatio.toFixed(2) },
-                    { label: 'Average Loss per Trade', value: losingTradeList.length > 0 ? `$${avgLoss.toFixed(2)}` : '—' },
-                    { label: 'Average Win per Trade', value: winningTradeList.length > 0 ? `$${avgWin.toFixed(2)}` : '—' }
+                    { label: 'Average Loss per Trade', value: pdfLosingTrades > 0 ? `$${avgLoss.toFixed(2)}` : '—' },
+                    { label: 'Average Win per Trade', value: pdfWinningTrades > 0 ? `$${avgWin.toFixed(2)}` : '—' }
                 ];
                 
                 riskMetrics.forEach((metric, index) => {
@@ -5069,7 +5467,22 @@
                 addFooter();
                 
                 console.log('PDF generation complete, saving file...');
-                const fileName = `ROWRIC_Institutional_Report_${Date.now()}.pdf`;
+
+                // Generate date range for filename
+                const formatDate = (date) => {
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const d = new Date(date);
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = months[d.getMonth()];
+                    const year = d.getFullYear();
+                    return `${day}.${month}.${year}`;
+                };
+
+                const allDates = processedList.map(item => item.date).filter(d => d);
+                const fromDate = allDates.length > 0 ? new Date(Math.min(...allDates)) : new Date();
+                const toDate = allDates.length > 0 ? new Date(Math.max(...allDates)) : new Date();
+
+                const fileName = `ROWRIC Trading Transaction From ${formatDate(fromDate)} to ${formatDate(toDate)}.pdf`;
                 console.log('Saving as:', fileName);
                 pdf.save(fileName);
                 console.log('PDF file saved successfully');
@@ -5257,8 +5670,24 @@
                     }
                     
                     pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
-                    pdf.save(`ROWRIC_LIVE_AUDIT_${Date.now()}.pdf`);
-                    
+
+                    // Generate date range for filename
+                    const formatDate = (date) => {
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const d = new Date(date);
+                        const day = String(d.getDate()).padStart(2, '0');
+                        const month = months[d.getMonth()];
+                        const year = d.getFullYear();
+                        return `${day}.${month}.${year}`;
+                    };
+
+                    const allDates = effectiveList.map(item => item.date).filter(d => d);
+                    const fromDate = allDates.length > 0 ? new Date(Math.min(...allDates)) : new Date();
+                    const toDate = allDates.length > 0 ? new Date(Math.max(...allDates)) : new Date();
+
+                    const fileName = `ROWRIC Trading Transaction From ${formatDate(fromDate)} to ${formatDate(toDate)}.pdf`;
+                    pdf.save(fileName);
+
                     console.log('PDF saved successfully');
                     
                 } catch (error) {
