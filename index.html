@@ -1100,7 +1100,43 @@
             applyPinLayout();
             window.addEventListener('resize', applyPinLayout);
 
+            // Initialize overview view on page load
+            function initializeOverview() {
+                // Hide all sections except overview sections
+                const sectionsToHide = [
+                    'institution-section',
+                    'risk-assessment-section',
+                    'holding-section',
+                    'temporal-section',
+                    'factor-section',
+                    'risk-ruin-section',
+                    'monte-carlo-section',
+                    'monthly-heatmap-section',
+                    'drawdown-heatmap-section',
+                    'notional-section',
+                    'rebate-section',
+                    'report-generator-section',
+                    'export-button-section',
+                    'transactions-section'
+                ];
+
+                sectionsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
+                // Show overview sections
+                const overviewSections = ['metrics-section', 'chart-section', 'open-trades-section'];
+                overviewSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = '';
+                });
+            }
+
             window.onload = function () {
+                // Initialize overview view as default
+                initializeOverview();
+                
                 updateWorldClocks();
                 setInterval(updateWorldClocks, 1000);
                 fetchAndParseCSV(true);
