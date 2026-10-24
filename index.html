@@ -219,6 +219,163 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* P/L Activity Calendar Styles */
+        .activity-calendar-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .calendar-3x4-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .calendar-3x4-grid.auto-fit {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+
+        .calendar-month-column {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            min-width: 0;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .calendar-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            width: 100%;
+        }
+
+        .calendar-month-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            width: 100%;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .calendar-month-header .month-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #D6D6D6;
+        }
+
+        .calendar-month-header .year-label {
+            font-size: 9px;
+            color: #858585;
+            font-weight: 600;
+        }
+
+        .calendar-month-header .month-total {
+            font-size: 9px;
+            color: #FFB000;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .calendar-weeks {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            width: 100%;
+        }
+
+        .calendar-day-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+
+        .day-header-cell {
+            text-align: center;
+            font-size: 8px;
+            font-weight: 700;
+            color: #444;
+            padding: 2px 0;
+        }
+
+        .calendar-weeks .day-cell {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 2px;
+            background: #080808;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 600;
+            color: #858585;
+        }
+
+        .day-cell.empty-cell {
+            background: transparent;
+            cursor: default;
+        }
+
+        .day-cell.empty-cell:hover {
+            background: transparent;
+        }
+
+        .day-cell:hover {
+            background: #101010;
+        }
+
+        /* Red levels for losses */
+        .day-cell.loss-level-1 { background: rgba(255,69,69,0.3); }
+        .day-cell.loss-level-2 { background: rgba(255,69,69,0.5); }
+        .day-cell.loss-level-3 { background: rgba(255,69,69,0.7); }
+        .day-cell.loss-level-4 { background: rgba(255,69,69,0.85); }
+        .day-cell.loss-level-5 { background: #FF4545; }
+
+        /* Green levels for gains */
+        .day-cell.gain-level-1 { background: rgba(0,200,83,0.3); }
+        .day-cell.gain-level-2 { background: rgba(0,200,83,0.5); }
+        .day-cell.gain-level-3 { background: rgba(0,200,83,0.7); }
+        .day-cell.gain-level-4 { background: rgba(0,200,83,0.85); }
+        .day-cell.gain-level-5 { background: #00C853; }
+
+        .day-number {
+            font-size: 10px;
+            font-weight: 600;
+            color: #ffffff;
+            opacity: 0.7;
+        }
+
+        .day-cell:hover .day-number {
+            opacity: 1;
+        }
+
+        /* P/L Tooltip */
+        #pl-tooltip {
+            position: fixed;
+            background: #080808;
+            color: #D6D6D6;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            white-space: nowrap;
+            border: 1px solid #383838;
+        }
+
         </style>
     </head>
 
@@ -314,6 +471,7 @@
         </div>
 
         <div id="table-tooltip"></div>
+        <div id="pl-tooltip"></div>
 
         <main id="main-content" class="max-w-7xl mx-auto px-3 py-6 sm:px-4 sm:py-12 space-y-4 sm:space-y-6" style="display: none; overflow-y: auto; height: 100vh;">
 
@@ -597,6 +755,45 @@
                             <tr><td colspan="13" class="text-center py-8 text-terminalMuted">AWAITING DATA FETCH...</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- P/L Activity Calendar -->
+            <div id="pl-activity-section" class="bg-terminalDark border border-terminalBorder p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <h4 class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em]">P/L Activity Calendar</h4>
+                    <div class="flex items-center gap-2">
+                        <button class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber" id="pl-cal-month-btn" onclick="setPLCalendarTimeframe('month')">Month</button>
+                        <button class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder" id="pl-cal-year-btn" onclick="setPLCalendarTimeframe('year')">Year</button>
+                        <button class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder" id="pl-cal-total-btn" onclick="setPLCalendarTimeframe('total')">Total</button>
+                        <select id="pl-cal-year-select" class="px-2 py-1 text-[10px] font-bold bg-terminalBlack text-terminalText border border-terminalBorder cursor-pointer" onchange="selectPLCalendarYear(this.value)">
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-1 mb-4">
+                    <div class="metric-card"><p class="metric-label">Total P/L</p><p id="pl-cal-total-pl" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Avg Per Day</p><p id="pl-cal-avg-pl" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Best Day</p><p id="pl-cal-best-day" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Worst Day</p><p id="pl-cal-worst-day" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Active Days</p><p id="pl-cal-active-days" class="metric-value">-</p></div>
+                </div>
+                <div class="activity-calendar-container" id="pl-activity-calendar">
+                    <div class="text-center py-8 text-terminalMuted text-xs">Loading P/L calendar...</div>
+                </div>
+                <div class="flex items-center gap-2 mt-4 text-[9px] text-terminalMuted uppercase tracking-widest">
+                    <span>Losses</span>
+                    <div class="w-3 h-3 bg-terminalRed/30 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed/50 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed/70 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed/85 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed rounded-sm"></div>
+                    <span class="mx-2">|</span>
+                    <span>Gains</span>
+                    <div class="w-3 h-3 bg-terminalGreen/30 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen/50 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen/70 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen/85 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen rounded-sm"></div>
                 </div>
             </div>
 
@@ -1117,7 +1314,8 @@
                     'rebate-section',
                     'report-generator-section',
                     'export-button-section',
-                    'transactions-section'
+                    'transactions-section',
+                    'pl-activity-section'
                 ];
 
                 sectionsToHide.forEach(id => {
@@ -1828,7 +2026,8 @@
                     'rebate-section',
                     'report-generator-section',
                     'export-button-section',
-                    'transactions-section'
+                    'transactions-section',
+                    'pl-activity-section'
                 ];
 
                 sectionsToHide.forEach(id => {
@@ -1852,6 +2051,7 @@
                 populateHistoryTable(filteredProcessedList);
                 renderChart(filteredProcessedList);
                 computeInstitutionMetrics(filteredProcessedList, cachedTotalDeposits);
+                setPLCalendarTimeframe('month');
 
                 // Scroll to top for home experience
                 document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
@@ -1871,7 +2071,8 @@
                     'drawdown-heatmap-section',
                     'rebate-section',
                     'report-generator-section',
-                    'export-button-section'
+                    'export-button-section',
+                    'pl-activity-section'
                 ];
 
                 sectionsToHide.forEach(id => {
@@ -1880,7 +2081,7 @@
                 });
 
                 // Show portfolio sections
-                const portfolioSections = ['transactions-section', 'holding-section', 'factor-section', 'monthly-heatmap-section', 'notional-section'];
+                const portfolioSections = ['transactions-section', 'pl-activity-section', 'holding-section', 'factor-section', 'monthly-heatmap-section', 'notional-section'];
                 portfolioSections.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = '';
@@ -1907,7 +2108,8 @@
                     'report-generator-section',
                     'export-button-section',
                     'transactions-section',
-                    'monte-carlo-section'
+                    'monte-carlo-section',
+                    'pl-activity-section'
                 ];
 
                 sectionsToHide.forEach(id => {
@@ -1947,7 +2149,8 @@
                     'rebate-section',
                     'report-generator-section',
                     'export-button-section',
-                    'transactions-section'
+                    'transactions-section',
+                    'pl-activity-section'
                 ];
 
                 sectionsToHide.forEach(id => {
@@ -2194,6 +2397,10 @@
                 
                 // Populate available months for report generator
                 populateAvailableMonths();
+
+                // Initialize P/L calendar
+                populateYearSelector();
+                setPLCalendarTimeframe('month');
             }
 
             function getStandardDeviation(array) {
@@ -2520,6 +2727,495 @@
                     row.innerHTML = html;
                     tbody.appendChild(row);
                 });
+            }
+
+            // ============================================================
+            // P/L ACTIVITY CALENDAR
+            // ============================================================
+            let plCalendarTimeframe = 'month';
+            let plSelectedYear = null;
+            let plSelectedMonth = null;
+
+            function setPLCalendarTimeframe(timeframe) {
+                plCalendarTimeframe = timeframe;
+
+                // Update button states
+                document.getElementById('pl-cal-month-btn').className = timeframe === 'month'
+                    ? 'px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber'
+                    : 'px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder';
+                document.getElementById('pl-cal-year-btn').className = timeframe === 'year'
+                    ? 'px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber'
+                    : 'px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder';
+                document.getElementById('pl-cal-total-btn').className = timeframe === 'total'
+                    ? 'px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber'
+                    : 'px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder';
+
+                // Show/hide year selector
+                const yearSelect = document.getElementById('pl-cal-year-select');
+                yearSelect.style.display = timeframe === 'year' ? 'block' : 'none';
+
+                // Initialize defaults
+                const today = new Date();
+                if (timeframe === 'month') {
+                    plSelectedYear = today.getFullYear();
+                    plSelectedMonth = today.getMonth();
+                } else if (timeframe === 'year') {
+                    plSelectedYear = plSelectedYear || today.getFullYear();
+                    plSelectedMonth = null;
+                } else {
+                    plSelectedYear = null;
+                    plSelectedMonth = null;
+                }
+
+                generatePLCalendar();
+                updatePLCalendar();
+            }
+
+            function selectPLCalendarYear(year) {
+                plSelectedYear = parseInt(year);
+                plSelectedMonth = null;
+                generatePLCalendar();
+                updatePLCalendar();
+            }
+
+            function populateYearSelector() {
+                const yearSelect = document.getElementById('pl-cal-year-select');
+                if (!yearSelect) return;
+
+                // Get all years from processed data
+                const years = new Set();
+                if (processedList.length > 0) {
+                    processedList.forEach(item => {
+                        years.add(item.date.getFullYear());
+                    });
+                }
+
+                // Add current year if not present
+                const currentYear = new Date().getFullYear();
+                years.add(currentYear);
+
+                // Sort years descending
+                const sortedYears = Array.from(years).sort((a, b) => b - a);
+
+                // Clear existing options
+                yearSelect.innerHTML = '';
+
+                // Add options
+                sortedYears.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                });
+
+                // Set current selection
+                if (plSelectedYear) {
+                    yearSelect.value = plSelectedYear;
+                } else {
+                    yearSelect.value = currentYear;
+                }
+
+                // Initially hide the selector
+                yearSelect.style.display = 'none';
+            }
+
+            function formatUTC7Date(date) {
+                const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+                const utc7Date = new Date(utc + (3600000 * 7));
+                const year = utc7Date.getFullYear();
+                const month = String(utc7Date.getMonth() + 1).padStart(2, '0');
+                const day = String(utc7Date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            function generatePLCalendar() {
+                const calendar = document.getElementById('pl-activity-calendar');
+                calendar.innerHTML = '';
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                let startDate, endDate;
+
+                switch (plCalendarTimeframe) {
+                    case 'month':
+                        if (plSelectedYear !== null && plSelectedMonth !== null) {
+                            startDate = new Date(plSelectedYear, plSelectedMonth, 1);
+                            endDate = new Date(plSelectedYear, plSelectedMonth + 1, 0);
+                        } else {
+                            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                        }
+                        break;
+                    case 'year':
+                        if (plSelectedYear !== null) {
+                            startDate = new Date(plSelectedYear, 0, 1);
+                            endDate = new Date(plSelectedYear, 11, 31);
+                        } else {
+                            startDate = new Date(today.getFullYear(), 0, 1);
+                            endDate = new Date(today.getFullYear(), 11, 31);
+                        }
+                        break;
+                    case 'total':
+                        if (processedList.length > 0) {
+                            const earliestDate = processedList.reduce((min, item) => item.date < min.date ? item : min).date;
+                            startDate = new Date(earliestDate);
+                        } else {
+                            startDate = new Date(today);
+                            startDate.setDate(today.getDate() - 30);
+                        }
+                        endDate = today;
+                        break;
+                    default:
+                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                }
+
+                // Group by month (only include past or current dates, not future)
+                const monthGroups = {};
+                let currentDate = new Date(startDate);
+                
+                while (currentDate <= endDate) {
+                    const compareDate = new Date(currentDate);
+                    compareDate.setHours(0, 0, 0, 0);
+                    
+                    // Stop if we reach future dates
+                    if (compareDate > endDate) break;
+                    
+                    const year = currentDate.getFullYear();
+                    const month = currentDate.getMonth();
+                    const key = `${year}-${month}`;
+                    
+                    if (!monthGroups[key]) {
+                        monthGroups[key] = {
+                            year,
+                            month,
+                            days: []
+                        };
+                    }
+                    
+                    monthGroups[key].days.push(new Date(currentDate));
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                // Get sorted months (early to current)
+                const sortedKeys = Object.keys(monthGroups).sort((a, b) => {
+                    const [yearA, monthA] = a.split('-').map(Number);
+                    const [yearB, monthB] = b.split('-').map(Number);
+                    if (yearA !== yearB) return yearA - yearB;
+                    return monthA - monthB;
+                });
+                
+                // Create grid container
+                const grid = document.createElement('div');
+                grid.className = 'calendar-3x4-grid';
+                
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+                // Show all months for year/total, last 3 months for month view
+                const monthsToShow = plCalendarTimeframe === 'month' ? sortedKeys.slice(-3) : sortedKeys;
+                
+                monthsToShow.forEach(key => {
+                    const group = monthGroups[key];
+                    const columnDiv = document.createElement('div');
+                    columnDiv.className = 'calendar-month-column';
+
+                    // Month header
+                    const header = document.createElement('div');
+                    header.className = 'calendar-month-header';
+                    
+                    const monthLabel = document.createElement('div');
+                    monthLabel.className = 'month-label';
+                    monthLabel.textContent = monthNames[group.month];
+                    header.appendChild(monthLabel);
+
+                    const yearLabel = document.createElement('div');
+                    yearLabel.className = 'year-label';
+                    yearLabel.textContent = group.year;
+                    header.appendChild(yearLabel);
+
+                    // Calculate total percentage for this month (compound)
+                    let monthCumulativeFactor = 1.0;
+                    group.days.forEach(date => {
+                        const dateStr = formatUTC7Date(date);
+                        const dayTrades = processedList.filter(item => !item.isFunding && formatUTC7Date(item.date) === dateStr);
+                        
+                        if (dayTrades.length > 0) {
+                            // Get balance at start of this day
+                            const firstTradeBalance = dayTrades[0].balance - dayTrades[0].netProfit;
+                            if (firstTradeBalance > 0) {
+                                const dayTotalPL = dayTrades.reduce((sum, item) => sum + item.netProfit, 0);
+                                const dayFactor = 1 + (dayTotalPL / firstTradeBalance);
+                                monthCumulativeFactor *= dayFactor;
+                            }
+                        }
+                    });
+
+                    const monthTotalPercent = (monthCumulativeFactor - 1) * 100;
+                    const monthTotalLabel = document.createElement('div');
+                    monthTotalLabel.className = 'month-total';
+                    monthTotalLabel.textContent = (monthTotalPercent >= 0 ? '+' : '') + Math.abs(monthTotalPercent).toFixed(2) + '%';
+                    header.appendChild(monthTotalLabel);
+
+                    columnDiv.appendChild(header);
+
+                    // Create calendar container
+                    const calendarContainer = document.createElement('div');
+                    calendarContainer.className = 'calendar-container';
+
+                    // Add day-of-week header
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'calendar-day-header';
+                    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                    dayNames.forEach(dayName => {
+                        const dayHeaderCell = document.createElement('div');
+                        dayHeaderCell.className = 'day-header-cell';
+                        dayHeaderCell.textContent = dayName;
+                        dayHeader.appendChild(dayHeaderCell);
+                    });
+                    calendarContainer.appendChild(dayHeader);
+
+                    // Create weeks grid
+                    const weeksDiv = document.createElement('div');
+                    weeksDiv.className = 'calendar-weeks';
+
+                    // Filter out future dates
+                    const filteredDays = group.days.filter(date => {
+                        const compareDate = new Date(date);
+                        compareDate.setHours(0, 0, 0, 0);
+                        return compareDate <= endDate;
+                    });
+
+                    // Create a proper calendar grid
+                    const firstDayOfMonth = new Date(group.year, group.month, 1);
+                    const startDayOfWeek = firstDayOfMonth.getDay();
+
+                    // Add empty cells for days before the first day of the month
+                    for (let i = 0; i < startDayOfWeek; i++) {
+                        const emptyCell = document.createElement('div');
+                        emptyCell.className = 'day-cell empty-cell';
+                        weeksDiv.appendChild(emptyCell);
+                    }
+
+                    // Create a map to track which days we've added
+                    const daysMap = new Map();
+                    filteredDays.forEach(date => {
+                        const dayNum = date.getDate();
+                        daysMap.set(dayNum, date);
+                    });
+
+                    // Add day cells for each day in the month (1 to last day)
+                    const lastDayOfMonth = new Date(group.year, group.month + 1, 0).getDate();
+                    for (let day = 1; day <= lastDayOfMonth; day++) {
+                        const date = daysMap.get(day);
+                        if (date) {
+                            const cell = document.createElement('div');
+                            cell.className = 'day-cell';
+                            cell.dataset.date = formatUTC7Date(date);
+
+                            // Add date number
+                            const dayNumber = document.createElement('span');
+                            dayNumber.className = 'day-number';
+                            dayNumber.textContent = day;
+                            cell.appendChild(dayNumber);
+
+                            cell.addEventListener('mouseenter', (e) => showPLTooltip(e, date, cell));
+                            cell.addEventListener('mouseleave', hidePLTooltip);
+
+                            weeksDiv.appendChild(cell);
+                        } else {
+                            // Day exists in month but no data - add empty cell
+                            const emptyCell = document.createElement('div');
+                            emptyCell.className = 'day-cell empty-cell';
+                            const dayNumber = document.createElement('span');
+                            dayNumber.className = 'day-number';
+                            dayNumber.textContent = day;
+                            dayNumber.style.opacity = '0.3';
+                            emptyCell.appendChild(dayNumber);
+                            weeksDiv.appendChild(emptyCell);
+                        }
+                    }
+
+                    calendarContainer.appendChild(weeksDiv);
+                    columnDiv.appendChild(calendarContainer);
+                    grid.appendChild(columnDiv);
+                });
+
+                calendar.appendChild(grid);
+            }
+
+            function updatePLCalendar() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                let startDate, endDate;
+
+                // Determine date range based on current timeframe
+                switch (plCalendarTimeframe) {
+                    case 'month':
+                        if (plSelectedYear !== null && plSelectedMonth !== null) {
+                            startDate = new Date(plSelectedYear, plSelectedMonth, 1);
+                            const monthEnd = new Date(plSelectedYear, plSelectedMonth + 1, 0);
+                            endDate = monthEnd > today ? today : monthEnd;
+                        } else {
+                            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                            endDate = today;
+                        }
+                        break;
+                    case 'year':
+                        if (plSelectedYear !== null) {
+                            startDate = new Date(plSelectedYear, 0, 1);
+                            const yearEnd = new Date(plSelectedYear, 11, 31);
+                            endDate = yearEnd > today ? today : yearEnd;
+                        } else {
+                            startDate = new Date(today.getFullYear(), 0, 1);
+                            endDate = today;
+                        }
+                        break;
+                    case 'total':
+                        if (processedList.length > 0) {
+                            const earliestDate = processedList.reduce((min, item) => item.date < min.date ? item : min).date;
+                            startDate = new Date(earliestDate);
+                        } else {
+                            startDate = new Date(today);
+                            startDate.setDate(today.getDate() - 30);
+                        }
+                        endDate = today;
+                        break;
+                    default:
+                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                        endDate = today;
+                }
+
+                // Convert date range to UTC+7 strings for comparison
+                const startDateStr = formatUTC7Date(startDate);
+                const endDateStr = formatUTC7Date(endDate);
+
+                // Filter trades to the current timeframe using string comparison
+                const filteredTrades = processedList.filter(item => {
+                    const itemDateStr = formatUTC7Date(item.date);
+                    return !item.isFunding && itemDateStr >= startDateStr && itemDateStr <= endDateStr;
+                });
+
+                // Calculate daily percentage returns from filtered trades (compound)
+                const dailyPL = {};
+
+                filteredTrades.forEach(item => {
+                    const dateStr = formatUTC7Date(item.date);
+                    if (!dailyPL[dateStr]) {
+                        dailyPL[dateStr] = 0;
+                    }
+                    // Calculate return as percentage of balance before this trade
+                    const balanceBeforeTrade = item.balance - item.netProfit;
+                    if (balanceBeforeTrade > 0) {
+                        const returnPercent = (item.netProfit / balanceBeforeTrade) * 100;
+                        dailyPL[dateStr] += returnPercent;
+                    }
+                });
+
+                const cells = document.querySelectorAll('.day-cell');
+                const maxAbsPL = Math.max(...Object.values(dailyPL).map(Math.abs), 1);
+
+                cells.forEach(cell => {
+                    const date = cell.dataset.date;
+                    const pl = dailyPL[date] || 0;
+
+                    cell.className = 'day-cell';
+                    cell.dataset.pl = pl;
+
+                    if (pl !== 0) {
+                        // 5 levels for gains and losses
+                        const absPL = Math.abs(pl);
+                        const level = Math.ceil((absPL / maxAbsPL) * 5);
+                        const levelClass = Math.min(level, 5);
+                        
+                        if (pl > 0) {
+                            cell.classList.add(`gain-level-${levelClass}`);
+                        } else {
+                            cell.classList.add(`loss-level-${levelClass}`);
+                        }
+                    }
+                });
+
+                // Update calendar statistics
+                updatePLCalendarStats(dailyPL, startDate, endDate);
+            }
+
+            function updatePLCalendarStats(dailyPL, startDate, endDate) {
+                let totalCumulativeFactor = 1.0;
+                let activeDays = 0;
+                let bestDay = { date: null, pl: 0 };
+                let worstDay = { date: null, pl: 0 };
+                const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = formatUTC7Date(d);
+                    const pl = dailyPL[dateStr] || 0;
+
+                    if (pl !== 0) {
+                        // Compound the daily returns
+                        totalCumulativeFactor *= (1 + (pl / 100));
+                        activeDays++;
+
+                        if (pl > bestDay.pl) {
+                            bestDay = { date: dateStr, pl };
+                        }
+
+                        if (pl < worstDay.pl) {
+                            worstDay = { date: dateStr, pl };
+                        }
+                    }
+                }
+
+                const totalPLPercent = (totalCumulativeFactor - 1) * 100;
+
+                // Update stats display
+                document.getElementById('pl-cal-total-pl').textContent = (totalPLPercent >= 0 ? '+' : '') + Math.abs(totalPLPercent).toFixed(2) + '%';
+                document.getElementById('pl-cal-total-pl').className = `metric-value ${totalPLPercent >= 0 ? 'val-pos' : 'val-neg'}`;
+
+                const avgPL = activeDays > 0 ? totalPLPercent / activeDays : 0;
+                document.getElementById('pl-cal-avg-pl').textContent = (avgPL >= 0 ? '+' : '') + Math.abs(avgPL).toFixed(2) + '%';
+                document.getElementById('pl-cal-avg-pl').className = `metric-value ${avgPL >= 0 ? 'val-pos' : 'val-neg'}`;
+
+                if (bestDay.date) {
+                    const bestDate = new Date(bestDay.date);
+                    const dateStr = bestDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    document.getElementById('pl-cal-best-day').textContent = `${dateStr}: ${(bestDay.pl >= 0 ? '+' : '') + Math.abs(bestDay.pl).toFixed(2)}%`;
+                    document.getElementById('pl-cal-best-day').className = `metric-value ${bestDay.pl >= 0 ? 'val-pos' : 'val-neg'}`;
+                } else {
+                    document.getElementById('pl-cal-best-day').textContent = '--';
+                    document.getElementById('pl-cal-best-day').className = 'metric-value val-neutral';
+                }
+
+                if (worstDay.date) {
+                    const worstDate = new Date(worstDay.date);
+                    const dateStr = worstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    document.getElementById('pl-cal-worst-day').textContent = `${dateStr}: ${(worstDay.pl >= 0 ? '+' : '') + Math.abs(worstDay.pl).toFixed(2)}%`;
+                    document.getElementById('pl-cal-worst-day').className = `metric-value ${worstDay.pl >= 0 ? 'val-pos' : 'val-neg'}`;
+                } else {
+                    document.getElementById('pl-cal-worst-day').textContent = '--';
+                    document.getElementById('pl-cal-worst-day').className = 'metric-value val-neutral';
+                }
+
+                document.getElementById('pl-cal-active-days').textContent = activeDays;
+            }
+
+            function showPLTooltip(e, date, cell) {
+                const tooltip = document.getElementById('pl-tooltip');
+                const dateStr = date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                const pl = cell.dataset.pl ? parseFloat(cell.dataset.pl) : 0;
+                tooltip.textContent = `${dateStr} - ${pl >= 0 ? '+' : ''}${Math.abs(pl).toFixed(2)}%`;
+                tooltip.style.display = 'block';
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY - 30 + 'px';
+            }
+
+            function hidePLTooltip() {
+                document.getElementById('pl-tooltip').style.display = 'none';
             }
 
             // ============================================================
