@@ -1062,9 +1062,12 @@
                 </div>
             </div>
 
-        <div id="export-button-section" class="flex justify-center py-10">
+        <div id="export-button-section" class="flex justify-center py-10 gap-4">
             <button id="exportBtn" onclick="exportPDF()" class="px-6 py-3 sm:px-8 sm:py-4 bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] uppercase tracking-widest font-black hover:border-terminalAmber hover:text-terminalAmber transition-all flex items-center gap-2 sm:gap-3">
                 <i class="fa-solid fa-file-arrow-down text-sm"></i> EXPORT AUDIT PDF
+            </button>
+            <button onclick="showMonthlyReportGenerator()" class="px-6 py-3 sm:px-8 sm:py-4 bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] uppercase tracking-widest font-black hover:border-terminalAmber hover:text-terminalAmber transition-all flex items-center gap-2 sm:gap-3">
+                <i class="fa-solid fa-calendar text-sm"></i> MONTHLY REPORT
             </button>
         </div>
         </main>
@@ -1313,7 +1316,6 @@
                     'notional-section',
                     'rebate-section',
                     'report-generator-section',
-                    'export-button-section',
                     'transactions-section',
                     'pl-activity-section'
                 ];
@@ -1324,7 +1326,7 @@
                 });
 
                 // Show overview sections
-                const overviewSections = ['metrics-section', 'chart-section', 'open-trades-section'];
+                const overviewSections = ['metrics-section', 'chart-section', 'open-trades-section', 'export-button-section'];
                 overviewSections.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = '';
@@ -2025,7 +2027,6 @@
                     'notional-section',
                     'rebate-section',
                     'report-generator-section',
-                    'export-button-section',
                     'transactions-section',
                     'pl-activity-section'
                 ];
@@ -2036,7 +2037,7 @@
                 });
 
                 // Show overview sections
-                const overviewSections = ['metrics-section', 'chart-section', 'open-trades-section'];
+                const overviewSections = ['metrics-section', 'chart-section', 'open-trades-section', 'export-button-section'];
                 overviewSections.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = '';
@@ -2081,7 +2082,7 @@
                 });
 
                 // Show portfolio sections
-                const portfolioSections = ['transactions-section', 'pl-activity-section', 'holding-section', 'factor-section', 'monthly-heatmap-section', 'notional-section'];
+                const portfolioSections = ['transactions-section', 'pl-activity-section', 'holding-section', 'factor-section', 'monthly-heatmap-section', 'notional-section', 'export-button-section'];
                 portfolioSections.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = '';
@@ -2118,7 +2119,7 @@
                 });
 
                 // Show risk sections
-                const riskSections = ['institution-section', 'risk-assessment-section', 'temporal-section', 'risk-ruin-section', 'drawdown-heatmap-section'];
+                const riskSections = ['institution-section', 'risk-assessment-section', 'temporal-section', 'risk-ruin-section', 'drawdown-heatmap-section', 'export-button-section'];
                 riskSections.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = '';
@@ -4589,735 +4590,444 @@
 
                     const [year, month] = monthInput.split('-').map(Number);
                     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                    const monthName = monthNames[month - 1];
                     const monthAbbrev = monthNames[month - 1].substring(0, 3).toUpperCase();
 
-                    // Define date ranges for different periods
-                    const monthStart = new Date(year, month - 1, 1);
-                    const monthEnd = new Date(year, month, 0); // Last day of month
-                    const yearStart = new Date(year, 0, 1); // January 1st
-                    const oneYearAgo = new Date(year, month - 1, 1);
-                    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-                    const oneYearEnd = new Date(year, month, 0);
-
-                    // Helper function to get account value at a specific date
-                    function getAccountValueAtDate(targetDate) {
-                        // Find the last transaction on or before the target date
-                        const relevantTransactions = processedList.filter(item => item.date <= targetDate);
-                        if (relevantTransactions.length === 0) {
-                            return cachedTotalDeposits || 10000; // Fall back to initial deposit
+                    // Save current visibility state
+                    const originalVisibility = {};
+                    const allSections = [
+                        'metrics-section', 'chart-section', 'open-trades-section',
+                        'institution-section', 'risk-assessment-section',
+                        'holding-section', 'temporal-section', 'factor-section',
+                        'risk-ruin-section', 'monte-carlo-section',
+                        'monthly-heatmap-section', 'drawdown-heatmap-section',
+                        'notional-section', 'rebate-section',
+                        'report-generator-section', 'export-button-section',
+                        'transactions-section', 'pl-activity-section'
+                    ];
+                    
+                    allSections.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            originalVisibility[id] = el.style.display;
+                            el.style.display = 'none';
                         }
-                        return relevantTransactions[relevantTransactions.length - 1].balance;
-                    }
-
-                    // Helper function to filter trades by closing date range
-                    function getTradesInPeriod(startDate, endDate) {
-                        return processedList.filter(item => 
-                            !item.isFunding && 
-                            item.date >= startDate && 
-                            item.date <= endDate
-                        );
-                    }
-
-                    // Calculate period performance using TWR approach (same as dashboard)
-                    function calculatePeriodPerformance(trades, startDate, endDate) {
-                        if (trades.length === 0) {
-                            return {
-                                netProfit: 0,
-                                returnPercent: 0,
-                                startBalance: getAccountValueAtDate(startDate),
-                                trades
-                            };
-                        }
-                        
-                        // Use TWR methodology like the dashboard
-                        // Get the gain at start and end of period
-                        const startTransaction = processedList.find(item => item.date >= startDate) || processedList[0];
-                        const endTransaction = processedList.filter(item => item.date <= endDate).pop() || processedList[processedList.length - 1];
-                        
-                        const startGain = startTransaction ? startTransaction.gainPercent : 0;
-                        const endGain = endTransaction ? endTransaction.gainPercent : 0;
-                        
-                        // Calculate period return using TWR difference
-                        const periodReturn = endGain - startGain;
-                        
-                        // Calculate net profit (same as dashboard)
-                        const totalProfit = trades.reduce((sum, item) => sum + item.profit, 0);
-                        const totalCommission = trades.reduce((sum, item) => sum + (item.commission || 0), 0);
-                        const totalSwap = trades.reduce((sum, item) => sum + (item.swap || 0), 0);
-                        const netProfit = totalProfit - totalCommission - totalSwap;
-                        
-                        return {
-                            netProfit,
-                            returnPercent: periodReturn,
-                            startBalance: getAccountValueAtDate(startDate),
-                            trades
-                        };
-                    }
-
-                    // MTD Calculation
-                    const mtdTrades = getTradesInPeriod(monthStart, monthEnd);
-                    const mtdPerformance = calculatePeriodPerformance(mtdTrades, monthStart, monthEnd);
-
-                    // YTD Calculation
-                    const ytdTrades = getTradesInPeriod(yearStart, monthEnd);
-                    const ytdPerformance = calculatePeriodPerformance(ytdTrades, yearStart, monthEnd);
-
-                    // 1Y Calculation
-                    const oneYearTrades = getTradesInPeriod(oneYearAgo, oneYearEnd);
-                    const oneYearPerformance = calculatePeriodPerformance(oneYearTrades, oneYearAgo, oneYearEnd);
-
-                    // SI (Since Inception) Calculation
-                    const allTrades = processedList.filter(item => !item.isFunding);
-                    const firstTradeDate = processedList.length > 0 ? processedList[0].date : new Date();
-                    const siPerformance = calculatePeriodPerformance(allTrades, firstTradeDate, monthEnd);
-
-                    // Current balance at end of selected month
-                    const currentBalance = getAccountValueAtDate(monthEnd);
-
-                    // Risk Metrics for MTD period (EXACT same calculation as dashboard)
-                    let maxDrawdown = 0;
-                    let runningPeak = -Infinity;
-                    
-                    // Calculate drawdown using the EXACT same approach as dashboard's updateDashboardMetrics function
-                    const periodTransactions = processedList.filter(item => 
-                        item.date >= monthStart && item.date <= monthEnd
-                    );
-                    
-                    // Use shared unrealized gain percent (same as dashboard)
-                    const unrealizedGainPercent = sharedUnrealizedGainPercent;
-                    
-                    const ddSeries = periodTransactions.map((item, idx) => {
-                        const isLast = idx === periodTransactions.length - 1;
-                        // Add unrealized to the last point to match current drawdown calculation (same as dashboard)
-                        const gainWithUnrealized = isLast ? item.gainPercent + unrealizedGainPercent : item.gainPercent;
-                        
-                        if (gainWithUnrealized > runningPeak) runningPeak = gainWithUnrealized;
-                        
-                        // Calculate drawdown as percentage from peak: (current - peak) / (100 + peak) * 100
-                        // This is the EXACT formula used in the dashboard
-                        const currentValue = 100 + gainWithUnrealized;
-                        const peakValue = 100 + runningPeak;
-                        const drawdown = ((currentValue - peakValue) / peakValue) * 100;
-                        return parseFloat(drawdown.toFixed(2));
                     });
-                    
-                    // Max drawdown is the minimum (most negative) value from the drawdown series (same as dashboard)
-                    maxDrawdown = ddSeries.length > 0 ? Math.min(...ddSeries) : 0;
 
-                    // Calculate Sharpe Ratio for MTD (same approach as dashboard's computeInstitutionMetrics)
-                    let sharpeRatio = 0;
-                    if (mtdTrades.length > 1) {
-                        // Build compounding monthly return series from per-trade TWR-style returns (same as dashboard)
+                    // Show only the sections we want in the report, in order
+                    const sectionsToShow = ['metrics-section', 'chart-section', 'institution-section', 'risk-assessment-section', 'monthly-heatmap-section'];
+                    
+                    // Hide all sections first
+                    allSections.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            originalVisibility[id] = el.style.display;
+                            el.style.display = 'none';
+                        }
+                    });
+
+                    // Show only the sections we want
+                    sectionsToShow.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = '';
+                    });
+
+                    // Hide unwanted metric cards (NET PROFIT, BALANCE, UNREALIZED P/L)
+                    const metricsContainer = document.getElementById('metrics-section');
+                    if (metricsContainer) {
+                        const metricCards = metricsContainer.querySelectorAll('.metric-card');
+                        metricCards.forEach((card, index) => {
+                            // Keep: GAIN (TWR) [0], MAX DRAWDOWN [3], CURRENT DD [4]
+                            // Hide: NET PROFIT [1], BALANCE [2], UNREALIZED P/L [5]
+                            if (index === 1 || index === 2 || index === 5) {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    // Apply date filter from start of portfolio to end of selected month
+                    const originalDateFilter = { enabled: dateFilterEnabled, from: dateFilterFrom, to: dateFilterTo };
+                    const startDate = null; // No start date = from beginning of portfolio
+                    const endDate = new Date(year, month, 0, 23, 59, 59); // End of selected month
+                    dateFilterEnabled = true;
+                    dateFilterFrom = startDate;
+                    dateFilterTo = endDate;
+                    
+                    // Apply the filter
+                    filterByDateRange();
+                    
+                    // Wait for data to update
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    // Calculate metrics for the report summary
+                    const calculateMetrics = (list) => {
+                        const trades = list.filter(item => !item.isFunding);
+                        if (trades.length === 0) return null;
+                        
+                        const finalGain = list[list.length - 1].gainPercent;
+                        const firstDate = list[0].date;
+                        const lastDate = list[list.length - 1].date;
+                        
+                        // Calculate drawdown series
+                        let runningPeak = -Infinity;
+                        const ddSeries = list.map((item, idx) => {
+                            const gain = idx === 0 ? 0 : item.gainPercent;
+                            const currentValue = 100 + gain;
+                            if (currentValue > runningPeak) runningPeak = currentValue;
+                            const drawdown = ((currentValue - runningPeak) / runningPeak) * 100;
+                            return drawdown;
+                        });
+                        const maxDrawdown = Math.min(...ddSeries);
+                        
+                        // Calculate profit factor
+                        const wins = trades.filter(t => t.profit > 0);
+                        const losses = trades.filter(t => t.profit < 0);
+                        const grossProfit = wins.reduce((s, t) => s + t.profit, 0);
+                        const grossLoss = Math.abs(losses.reduce((s, t) => s + t.profit, 0));
+                        const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
+                        
+                        // Calculate Sharpe Ratio
                         const monthlyMap = {};
-                        mtdTrades.forEach(t => {
+                        trades.forEach(t => {
                             const r = t.tradeReturnPercent / 100;
                             const mKey = `${t.date.getFullYear()}-${t.date.getMonth()}`;
                             monthlyMap[mKey] = (monthlyMap[mKey] === undefined ? 1 : monthlyMap[mKey]) * (1 + r);
                         });
-                        
                         const monthlyReturns = Object.values(monthlyMap).map(v => v - 1);
+                        const avgMonthlyRet = monthlyReturns.reduce((a, b) => a + b, 0) / (monthlyReturns.length || 1);
+                        const monthlyStd = Math.sqrt(monthlyReturns.reduce((sum, r) => sum + Math.pow(r - avgMonthlyRet, 2), 0) / (monthlyReturns.length || 1));
+                        const monthlyRf = ANNUAL_RISK_FREE_RATE / 100 / 12;
+                        const annSharpe = monthlyStd > 0 ? ((avgMonthlyRet - monthlyRf) / monthlyStd) * Math.sqrt(12) : 0;
                         
-                        if (monthlyReturns.length > 0) {
-                            const avgMonthlyRet = monthlyReturns.reduce((a,b)=>a+b,0) / monthlyReturns.length;
-                            const monthlyStd = getStandardDeviation(monthlyReturns);
-                            
-                            // Calculate RFR-dependent metrics (same as dashboard)
-                            const monthlyRf = ANNUAL_RISK_FREE_RATE / 100 / 12;
-                            const annSharpe = monthlyStd > 0 ? ((avgMonthlyRet - monthlyRf) / monthlyStd) * Math.sqrt(12) : 0;
-                            sharpeRatio = annSharpe;
-                        }
-                    }
-
-                    // Calculate Profit Factor and Win Rate for MTD
-                    const mtdWinners = mtdTrades.filter(t => t.profit > 0);
-                    const mtdLosers = mtdTrades.filter(t => t.profit < 0);
-                    const mtdWinRate = mtdTrades.length > 0 ? (mtdWinners.length / mtdTrades.length * 100) : 0;
-                    
-                    const totalWinAmount = mtdWinners.reduce((sum, t) => sum + t.profit, 0);
-                    const totalLossAmount = Math.abs(mtdLosers.reduce((sum, t) => sum + t.profit, 0));
-                    const profitFactor = totalLossAmount > 0 ? totalWinAmount / totalLossAmount : (totalWinAmount > 0 ? Infinity : 0);
-
-                    // Get portfolio positioning at end of month
-                    const monthEndPositions = currentOpenTrades.length > 0 ? currentOpenTrades : [];
-                    
-                    // If no current positions, estimate from last trades in the month
-                    let positionData = {};
-                    if (monthEndPositions.length === 0 && mtdTrades.length > 0) {
-                        // Use symbols from last trades in the month as approximation
-                        const lastTrades = mtdTrades.slice(-10); // Last 10 trades
-                        lastTrades.forEach(trade => {
-                            const symbol = trade.symbol || 'Unknown';
-                            if (!positionData[symbol]) {
-                                positionData[symbol] = { volume: 0, count: 0 };
-                            }
-                            positionData[symbol].volume += trade.volume || 0;
-                            positionData[symbol].count++;
-                        });
-                    } else {
-                        monthEndPositions.forEach(trade => {
-                            const symbol = trade.symbol || 'Unknown';
-                            if (!positionData[symbol]) {
-                                positionData[symbol] = { volume: 0, count: 0 };
-                            }
-                            positionData[symbol].volume += parseFloat(trade.volume) || 0;
-                            positionData[symbol].count++;
-                        });
-                    }
-
-                    const totalVolume = Object.values(positionData).reduce((sum, pos) => sum + pos.volume, 0);
-                    const positions = Object.entries(positionData)
-                        .map(([symbol, data]) => ({
-                            symbol,
-                            volume: data.volume,
-                            percentage: totalVolume > 0 ? (data.volume / totalVolume * 100) : 0
-                        }))
-                        .sort((a, b) => b.volume - a.volume)
-                        .slice(0, 4);
-
-                    // Calculate monthly returns for the entire year
-                    const monthlyReturns = {};
-                    for (let m = 0; m < 12; m++) {
-                        const mStart = new Date(year, m, 1);
-                        const mEnd = new Date(year, m + 1, 0);
-                        const monthTrades = getTradesInPeriod(mStart, mEnd);
-                        const monthPerf = calculatePeriodPerformance(monthTrades, mStart, mEnd);
-                        monthlyReturns[m] = monthPerf.returnPercent;
-                    }
-
-                    // Create PDF
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    const pageWidth = pdf.internal.pageSize.getWidth();
-                    const pageHeight = pdf.internal.pageSize.getHeight();
-                    const margin = 15;
-                    const contentWidth = pageWidth - (margin * 2);
-
-                    // Header
-                    pdf.setFillColor(255, 255, 255);
-                    pdf.rect(0, 0, pageWidth, 40, 'F');
-                    
-                    pdf.setTextColor(0, 0, 0);
-                    pdf.setFontSize(16);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.text('OPLN', margin, 15);
-                    
-                    pdf.setFontSize(10);
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.text('MONTHLY PORTFOLIO REPORT', margin, 22);
-                    
-                    pdf.setFontSize(12);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.text(monthAbbrev + ' ' + year, margin, 30);
-                    
-                    pdf.setFontSize(14);
-                    pdf.text('$' + currentBalance.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}), pageWidth - margin, 30, { align: 'right' });
-                    
-                    pdf.setDrawColor(0, 0, 0);
-                    pdf.setLineWidth(0.5);
-                    pdf.line(margin, 40, pageWidth - margin, 40);
-
-                    let yPos = 50;
-
-                    // Performance Section
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('PERFORMANCE', margin, yPos);
-                    yPos += 8;
-
-                    const performanceData = [
-                        { label: 'MTD', value: mtdPerformance.returnPercent.toFixed(2) + '%' },
-                        { label: 'YTD', value: ytdPerformance.returnPercent.toFixed(2) + '%' },
-                        { label: '1Y', value: oneYearPerformance.returnPercent.toFixed(2) + '%' },
-                        { label: 'SI', value: siPerformance.returnPercent.toFixed(2) + '%' }
-                    ];
-
-                    performanceData.forEach((item, index) => {
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(9);
-                        pdf.text(item.label, margin, yPos);
-                        pdf.text(item.value, margin + 20, yPos);
-                        yPos += 6;
-                    });
-
-                    yPos += 10;
-
-                    // Risk & Performance Section
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('RISK & PERFORMANCE', margin + 80, yPos - 38);
-
-                    const riskData = [
-                        { label: 'Sharpe', value: sharpeRatio.toFixed(2) },
-                        { label: 'Max DD', value: maxDrawdown.toFixed(2) + '%' },
-                        { label: 'PF', value: isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞' },
-                        { label: 'Win Rate', value: mtdWinRate.toFixed(1) + '%' }
-                    ];
-
-                    let riskYPos = yPos - 32;
-                    riskData.forEach((item, index) => {
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(9);
-                        pdf.text(item.label, margin + 80, riskYPos);
-                        pdf.text(item.value, margin + 100, riskYPos);
-                        riskYPos += 6;
-                    });
-
-                    yPos = riskYPos + 10;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Equity Curve placeholder
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('EQUITY CURVE', margin, yPos);
-                    yPos += 30;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Portfolio Positioning and Trading Activity
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('PORTFOLIO POSITIONING', margin, yPos);
-                    yPos += 8;
-
-                    positions.forEach(pos => {
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(9);
-                        pdf.text(pos.symbol, margin, yPos);
-                        pdf.text(pos.percentage.toFixed(0) + '%', margin + 30, yPos);
-                        yPos += 6;
-                    });
-
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('TRADING ACTIVITY', margin + 80, yPos - 24);
-
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(9);
-                    pdf.text(mtdTrades.length + ' Trades', margin + 80, yPos - 18);
-                    pdf.text(mtdWinners.length + ' Winners / ' + mtdLosers.length + ' Losers', margin + 80, yPos - 12);
-                    pdf.text('PF ' + (isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞'), margin + 80, yPos - 6);
-
-                    yPos += 10;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Monthly Returns
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('MONTHLY RETURNS', margin, yPos);
-                    yPos += 8;
-
-                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    
-                    let monthX = margin;
-                    months.forEach((monthName, m) => {
-                        const returnPercent = monthlyReturns[m] || 0;
+                        // Calculate recovery factor
+                        const netProfit = trades.reduce((s, t) => s + t.profit, 0);
+                        const maxDDCash = (maxDrawdown / 100) * (list[0].balance || 10000);
+                        const recoveryFactor = Math.abs(maxDDCash) > 0 ? netProfit / Math.abs(maxDDCash) : 0;
                         
-                        // Highlight the selected month
-                        if (m === month - 1) {
-                            pdf.setFillColor(16, 185, 129); // Green highlight
-                            pdf.rect(monthX - 2, yPos - 6, 12, 12, 'F');
-                            pdf.setTextColor(255, 255, 255); // White text
+                        // Calculate CAGR
+                        const durationYears = Math.max((lastDate - firstDate) / (1000 * 60 * 60 * 24 * 365.25), 0.05);
+                        const initialDeposit = list[0].balance || 10000;
+                        const cagr = initialDeposit > 0 ? (Math.pow((initialDeposit + netProfit) / initialDeposit, 1 / durationYears) - 1) * 100 : 0;
+                        
+                        // Duration in months
+                        const durationMonths = Math.floor(durationYears * 12);
+                        
+                        return {
+                            return: finalGain,
+                            maxDrawdown: maxDrawdown,
+                            profitFactor: profitFactor,
+                            tradeCount: trades.length,
+                            sharpeRatio: annSharpe,
+                            recoveryFactor: recoveryFactor,
+                            cagr: cagr,
+                            duration: durationMonths,
+                            startDate: firstDate,
+                            endDate: lastDate
+                        };
+                    };
+
+                    // Calculate THIS MONTH metrics (actual monthly return, not cumulative)
+                    const monthStart = new Date(year, month - 1, 1);
+                    const monthEnd = new Date(year, month, 0, 23, 59, 59);
+                    const thisMonthTrades = processedList.filter(item => !item.isFunding && item.date >= monthStart && item.date <= monthEnd);
+                    
+                    let thisMonthMetrics = null;
+                    if (thisMonthTrades.length > 0) {
+                        // Get balance at start of month
+                        const beforeMonthData = processedList.filter(item => item.date < monthStart);
+                        const startBalance = beforeMonthData.length > 0 ? beforeMonthData[beforeMonthData.length - 1].balance : (processedList[0]?.balance || 10000);
+                        
+                        // Calculate net profit for the month
+                        const netProfit = thisMonthTrades.reduce((s, t) => s + t.profit, 0);
+                        
+                        // Calculate monthly return as percentage of starting balance
+                        const monthlyReturn = startBalance > 0 ? (netProfit / startBalance) * 100 : 0;
+                        
+                        // Calculate drawdown for the month
+                        let runningPeak = startBalance;
+                        let maxDrawdown = 0;
+                        thisMonthTrades.forEach(trade => {
+                            const currentBalance = startBalance + netProfit; // Simplified - use running balance
+                            if (currentBalance > runningPeak) runningPeak = currentBalance;
+                            const dd = ((currentBalance - runningPeak) / runningPeak) * 100;
+                            if (dd < maxDrawdown) maxDrawdown = dd;
+                        });
+                        
+                        // Better drawdown calculation using gain%
+                        let runningPeakGain = 0;
+                        const ddSeries = thisMonthTrades.map((trade, idx) => {
+                            const r = trade.tradeReturnPercent / 100;
+                            const cumulativeFactor = thisMonthTrades.slice(0, idx + 1).reduce((prod, t) => prod * (1 + (t.tradeReturnPercent / 100)), 1);
+                            const currentGain = (cumulativeFactor - 1) * 100;
+                            if (currentGain > runningPeakGain) runningPeakGain = currentGain;
+                            const currentValue = 100 + currentGain;
+                            const peakValue = 100 + runningPeakGain;
+                            const drawdown = ((currentValue - peakValue) / peakValue) * 100;
+                            return drawdown;
+                        });
+                        maxDrawdown = Math.min(...ddSeries);
+                        
+                        // Calculate profit factor
+                        const wins = thisMonthTrades.filter(t => t.profit > 0);
+                        const losses = thisMonthTrades.filter(t => t.profit < 0);
+                        const grossProfit = wins.reduce((s, t) => s + t.profit, 0);
+                        const grossLoss = Math.abs(losses.reduce((s, t) => s + t.profit, 0));
+                        const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
+                        
+                        thisMonthMetrics = {
+                            return: monthlyReturn,
+                            maxDrawdown: maxDrawdown,
+                            profitFactor: profitFactor,
+                            tradeCount: thisMonthTrades.length,
+                            sharpeRatio: 0, // Not meaningful for single month
+                            recoveryFactor: 0, // Not meaningful for single month
+                            cagr: 0, // Not meaningful for single month
+                            duration: 1,
+                            startDate: monthStart,
+                            endDate: monthEnd
+                        };
+                    }
+
+                    // Calculate YTD metrics (Jan 1 to selected month)
+                    const ytdStart = new Date(year, 0, 1);
+                    const ytdData = processedList.filter(item => item.date >= ytdStart && item.date <= monthEnd);
+                    const ytdMetrics = calculateMetrics(ytdData);
+
+                    // Calculate OVERALL metrics (start to selected month)
+                    const overallMetrics = calculateMetrics(filteredProcessedList);
+
+                    // Format date range
+                    const formatDate = (d) => {
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+                    };
+
+                    // Build the text summary
+                    let summaryText = `MONTHLY PERFORMANCE REPORT | ${monthNames[month - 1].toUpperCase()} ${year}\n\n`;
+                    
+                    if (thisMonthMetrics) {
+                        summaryText += `THIS MONTH\n`;
+                        summaryText += `Return: ${thisMonthMetrics.return >= 0 ? '+' : ''}${thisMonthMetrics.return.toFixed(2)}%\n`;
+                        summaryText += `Max Drawdown: ${thisMonthMetrics.maxDrawdown.toFixed(2)}%\n`;
+                        summaryText += `Profit Factor: ${isFinite(thisMonthMetrics.profitFactor) ? thisMonthMetrics.profitFactor.toFixed(2) : '∞'}\n`;
+                        summaryText += `Trade Count: ${thisMonthMetrics.tradeCount}\n\n`;
+                    }
+                    
+                    if (ytdMetrics) {
+                        summaryText += `YTD\n`;
+                        summaryText += `Return: ${ytdMetrics.return >= 0 ? '+' : ''}${ytdMetrics.return.toFixed(2)}%\n`;
+                        summaryText += `Max Drawdown: ${ytdMetrics.maxDrawdown.toFixed(2)}%\n`;
+                        summaryText += `Profit Factor: ${isFinite(ytdMetrics.profitFactor) ? ytdMetrics.profitFactor.toFixed(2) : '∞'}\n`;
+                        summaryText += `Sharpe Ratio: ${ytdMetrics.sharpeRatio.toFixed(2)}\n`;
+                        summaryText += `Recovery Factor: ${ytdMetrics.recoveryFactor.toFixed(2)}\n`;
+                        summaryText += `Trade Count: ${ytdMetrics.tradeCount}\n\n`;
+                    }
+                    
+                    if (overallMetrics) {
+                        summaryText += `OVERALL (${formatDate(overallMetrics.startDate)} - ${formatDate(overallMetrics.endDate)})\n`;
+                        summaryText += `Duration: ${overallMetrics.duration} Months\n`;
+                        summaryText += `Total Return: ${overallMetrics.return >= 0 ? '+' : ''}${overallMetrics.return.toFixed(2)}%\n`;
+                        summaryText += `CAGR: ${overallMetrics.cagr.toFixed(2)}%\n`;
+                        summaryText += `Max Drawdown: ${overallMetrics.maxDrawdown.toFixed(2)}%\n`;
+                        summaryText += `Profit Factor: ${isFinite(overallMetrics.profitFactor) ? overallMetrics.profitFactor.toFixed(2) : '∞'}\n`;
+                        summaryText += `Sharpe Ratio: ${overallMetrics.sharpeRatio.toFixed(2)}\n`;
+                        summaryText += `Recovery Factor: ${overallMetrics.recoveryFactor.toFixed(2)}\n`;
+                        summaryText += `Trade Count: ${overallMetrics.tradeCount}`;
+                    }
+
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(summaryText).then(() => {
+                        console.log('Summary copied to clipboard');
+                    }).catch(err => {
+                        console.error('Failed to copy:', err);
+                    });
+
+                    // Show modal with the summary
+                    const shouldContinue = confirm(
+                        `Report Summary (copied to clipboard):\n\n${summaryText}\n\nClick OK to generate PNG report, or Cancel to abort.`
+                    );
+                    
+                    if (!shouldContinue) {
+                        // Restore and exit
+                        dateFilterEnabled = originalDateFilter.enabled;
+                        dateFilterFrom = originalDateFilter.from;
+                        dateFilterTo = originalDateFilter.to;
+                        if (dateFilterEnabled && processedList.length) {
+                            filteredProcessedList = processedList.filter(item => {
+                                const itemDate = item.date;
+                                if (dateFilterFrom && itemDate < dateFilterFrom) return false;
+                                if (dateFilterTo && itemDate > dateFilterTo) return false;
+                                if (item.isFunding) return false;
+                                return true;
+                            });
+                            recalculateFilteredMetrics();
                         } else {
-                            pdf.setTextColor(0, 0, 0); // Black text
+                            filteredProcessedList = [...processedList];
                         }
-                        
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(8);
-                        pdf.text(monthName, monthX, yPos);
-                        pdf.text(returnPercent.toFixed(1) + '%', monthX, yPos + 5);
-                        monthX += 14;
+                        updateDashboardMetrics(filteredProcessedList, cachedTotalDeposits, cachedTotalWithdrawals);
+                        return;
+                    }
+
+                    // Scroll to top
+                    document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // Wait for DOM to update and charts to render
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Capture each section individually
+                    const sectionCanvases = [];
+                    for (const id of sectionsToShow) {
+                        const section = document.getElementById(id);
+                        if (section) {
+                            // Use visible width instead of scrollable width to avoid capturing overflow
+                            const contentWidth = section.offsetWidth;
+                            const contentHeight = section.offsetHeight;
+                            
+                            const sectionCanvas = await html2canvas(section, {
+                                backgroundColor: '#000000',
+                                scale: 2,
+                                useCORS: true,
+                                logging: false,
+                                allowTaint: true,
+                                width: contentWidth,
+                                height: contentHeight,
+                                scrollX: 0,
+                                scrollY: 0
+                            });
+                            sectionCanvases.push(sectionCanvas);
+                        }
+                    }
+
+                    // Create a combined vertical canvas
+                    const maxWidth = Math.max(...sectionCanvases.map(c => c.width));
+                    const totalHeight = sectionCanvases.reduce((sum, c) => sum + c.height, 0);
+                    const combinedCanvas = document.createElement('canvas');
+                    combinedCanvas.width = maxWidth;
+                    combinedCanvas.height = totalHeight;
+                    const ctx = combinedCanvas.getContext('2d');
+                    
+                    // Fill background
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, maxWidth, totalHeight);
+                    
+                    // Draw each section vertically (top to bottom)
+                    let yOffset = 0;
+                    sectionCanvases.forEach(canvas => {
+                        ctx.drawImage(canvas, 0, yOffset);
+                        yOffset += canvas.height;
                     });
+
+                    // Convert combined canvas to PNG blob
+                    combinedCanvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `ROWRIC_Monthly_Report_${monthAbbrev}_${year}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 'image/png');
+
+                    // Restore original visibility
+                    allSections.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.style.display = originalVisibility[id] || '';
+                        }
+                    });
+
+                    // Restore metric cards visibility
+                    if (metricsContainer) {
+                        const metricCards = metricsContainer.querySelectorAll('.metric-card');
+                        metricCards.forEach(card => {
+                            card.style.display = '';
+                        });
+                    }
+
+                    // Restore original date filter state
+                    dateFilterEnabled = originalDateFilter.enabled;
+                    dateFilterFrom = originalDateFilter.from;
+                    dateFilterTo = originalDateFilter.to;
                     
-                    // Reset text color for remaining sections
-                    pdf.setTextColor(0, 0, 0);
-
-                    yPos += 15;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Manager Commentary
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('MANAGER COMMENTARY', margin, yPos);
-                    yPos += 8;
-
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(8);
-                    pdf.text('Short explanation', margin, yPos);
-                    yPos += 15;
-
-                    // Current Position
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('CURRENT POSITION:', margin + 80, yPos - 20);
+                    // Recalculate filtered data
+                    if (dateFilterEnabled && processedList.length) {
+                        filteredProcessedList = processedList.filter(item => {
+                            const itemDate = item.date;
+                            if (dateFilterFrom && itemDate < dateFilterFrom) return false;
+                            if (dateFilterTo && itemDate > dateFilterTo) return false;
+                            if (item.isFunding) return false;
+                            return true;
+                        });
+                        recalculateFilteredMetrics();
+                    } else {
+                        filteredProcessedList = [...processedList];
+                    }
                     
-                    const positionStatus = Math.abs(maxDrawdown) < 5 ? 'NORMAL' : Math.abs(maxDrawdown) < 15 ? 'MODERATE' : 'ELEVATED';
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(8);
-                    pdf.text(positionStatus, margin + 80, yPos - 15);
-
-                    // Footer
-                    pdf.setFillColor(245, 245, 245);
-                    pdf.rect(0, pageHeight - 20, pageWidth, 20, 'F');
-                    
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(7);
-                    pdf.setTextColor(100, 100, 100);
-                    pdf.text('Generated: ' + new Date().toLocaleString(), margin, pageHeight - 12);
-                    pdf.text('© ROWRIC Quantitative Trading System', pageWidth - margin, pageHeight - 12, { align: 'right' });
-
-                    // Save PDF
-                    const fileName = `OPLN_Monthly_Report_${monthAbbrev}_${year}.pdf`;
-                    pdf.save(fileName);
+                    // Update UI with restored data
+                    updateDashboardMetrics(filteredProcessedList, cachedTotalDeposits, cachedTotalWithdrawals);
+                    generateMonthlyReturns(filteredProcessedList);
+                    renderDrawdownHeatmap(filteredProcessedList);
+                    renderDrawdownDistribution(filteredProcessedList);
+                    populateHistoryTable(filteredProcessedList);
+                    renderChart(filteredProcessedList);
+                    computeInstitutionMetrics(filteredProcessedList, cachedTotalDeposits);
 
                 } catch (error) {
                     console.error('Error generating monthly report:', error);
                     alert('Error generating monthly report: ' + error.message);
+                    
+                    // Restore visibility on error
+                    const allSections = [
+                        'metrics-section', 'chart-section', 'open-trades-section',
+                        'institution-section', 'risk-assessment-section',
+                        'holding-section', 'temporal-section', 'factor-section',
+                        'risk-ruin-section', 'monte-carlo-section',
+                        'monthly-heatmap-section', 'drawdown-heatmap-section',
+                        'notional-section', 'rebate-section',
+                        'report-generator-section', 'export-button-section',
+                        'transactions-section', 'pl-activity-section'
+                    ];
+                    allSections.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = '';
+                    });
                 }
             }
-            async function generateMonthlyReport() {
-                try {
-                    const monthInput = document.getElementById('report-month').value;
-                    if (!monthInput) {
-                        alert('Please select a month for the report');
-                        return;
-                    }
 
-                    const [year, month] = monthInput.split('-').map(Number);
-                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                    const monthName = monthNames[month - 1];
-                    const monthAbbrev = monthNames[month - 1].substring(0, 3).toUpperCase();
+            // ============================================================
+            // SHOW MONTHLY REPORT GENERATOR
+            // ============================================================
+            function showMonthlyReportGenerator() {
+                // Hide all sections except report generator
+                const sectionsToHide = [
+                    'metrics-section',
+                    'chart-section',
+                    'open-trades-section',
+                    'institution-section',
+                    'risk-assessment-section',
+                    'holding-section',
+                    'temporal-section',
+                    'factor-section',
+                    'risk-ruin-section',
+                    'monte-carlo-section',
+                    'monthly-heatmap-section',
+                    'drawdown-heatmap-section',
+                    'notional-section',
+                    'rebate-section',
+                    'transactions-section',
+                    'pl-activity-section'
+                ];
 
-                    // Filter data for selected month
-                    const monthData = processedList.filter(item => {
-                        return item.date.getFullYear() === year && item.date.getMonth() === month - 1;
-                    });
+                sectionsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
 
-                    if (monthData.length === 0) {
-                        alert('No data available for the selected month');
-                        return;
-                    }
-
-                    // Calculate monthly metrics
-                    const monthTrades = monthData.filter(item => !item.isFunding);
-                    const monthFunding = monthData.filter(item => item.isFunding);
-                    
-                    const monthProfit = monthTrades.reduce((sum, item) => sum + item.profit, 0);
-                    const monthCommission = monthTrades.reduce((sum, item) => sum + (item.commission || 0), 0);
-                    const monthSwap = monthTrades.reduce((sum, item) => sum + (item.swap || 0), 0);
-                    const monthNetProfit = monthProfit - monthCommission - monthSwap;
-                    
-                    const monthWinners = monthTrades.filter(t => t.profit > 0);
-                    const monthLosers = monthTrades.filter(t => t.profit < 0);
-                    const monthWinRate = monthTrades.length > 0 ? (monthWinners.length / monthTrades.length * 100) : 0;
-                    
-                    const monthProfitFactor = monthLosers.length > 0 && monthLosers.reduce((sum, t) => sum + Math.abs(t.profit), 0) > 0 
-                        ? monthWinners.reduce((sum, t) => sum + t.profit, 0) / monthLosers.reduce((sum, t) => sum + Math.abs(t.profit), 0) 
-                        : monthWinners.length > 0 ? Infinity : 0;
-
-                    // Calculate YTD and other period metrics
-                    const yearData = processedList.filter(item => item.date.getFullYear() === year);
-                    const yearTrades = yearData.filter(item => !item.isFunding);
-                    const yearProfit = yearTrades.reduce((sum, item) => sum + item.profit, 0);
-                    const yearCommission = yearTrades.reduce((sum, item) => sum + (item.commission || 0), 0);
-                    const yearSwap = yearTrades.reduce((sum, item) => sum + (item.swap || 0), 0);
-                    const yearNetProfit = yearProfit - yearCommission - yearSwap;
-
-                    // Calculate 1Y performance
-                    const oneYearAgo = new Date(year, month - 1, 1);
-                    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-                    const oneYearData = processedList.filter(item => item.date >= oneYearAgo && item.date <= new Date(year, month, 0));
-                    const oneYearTrades = oneYearData.filter(item => !item.isFunding);
-                    const oneYearProfit = oneYearTrades.reduce((sum, item) => sum + item.profit, 0);
-                    const oneYearCommission = oneYearTrades.reduce((sum, item) => sum + (item.commission || 0), 0);
-                    const oneYearSwap = oneYearTrades.reduce((sum, item) => sum + (item.swap || 0), 0);
-                    const oneYearNetProfit = oneYearProfit - oneYearCommission - oneYearSwap;
-
-                    // Calculate since inception
-                    const siProfit = processedList.filter(item => !item.isFunding).reduce((sum, item) => sum + item.profit, 0);
-                    const siCommission = processedList.filter(item => !item.isFunding).reduce((sum, item) => sum + (item.commission || 0), 0);
-                    const siSwap = processedList.filter(item => !item.isFunding).reduce((sum, item) => sum + (item.swap || 0), 0);
-                    const siNetProfit = siProfit - siCommission - siSwap;
-
-                    // Calculate max drawdown for the period
-                    let maxDrawdown = 0;
-                    let runningPeak = 100;
-                    monthData.forEach((item, idx) => {
-                        const gain = idx === 0 ? 0 : item.gainPercent;
-                        const currentValue = 100 + gain;
-                        if (currentValue > runningPeak) runningPeak = currentValue;
-                        const drawdown = ((currentValue - runningPeak) / runningPeak) * 100;
-                        if (drawdown < maxDrawdown) maxDrawdown = drawdown;
-                    });
-
-                    // Get current balance
-                    const currentBalance = monthData.length > 0 ? monthData[monthData.length - 1].balance : 0;
-
-                    // Calculate Sharpe ratio
-                    const tradeReturns = monthTrades.map(t => t.tradeReturnPercent / 100);
-                    let sharpeRatio = 0;
-                    if (tradeReturns.length > 1) {
-                        const avgReturn = tradeReturns.reduce((a, b) => a + b, 0) / tradeReturns.length;
-                        const stdDev = Math.sqrt(tradeReturns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / tradeReturns.length);
-                        const annualizedReturn = avgReturn * Math.sqrt(12);
-                        const annualizedStdDev = stdDev * Math.sqrt(12);
-                        sharpeRatio = annualizedStdDev > 0 ? (annualizedReturn - (ANNUAL_RISK_FREE_RATE / 100)) / annualizedStdDev : 0;
-                    }
-
-                    // Get portfolio positioning
-                    const positionData = {};
-                    monthTrades.forEach(trade => {
-                        const symbol = trade.symbol || 'Unknown';
-                        if (!positionData[symbol]) {
-                            positionData[symbol] = { volume: 0, count: 0 };
-                        }
-                        positionData[symbol].volume += trade.volume || 0;
-                        positionData[symbol].count++;
-                    });
-
-                    const totalVolume = Object.values(positionData).reduce((sum, pos) => sum + pos.volume, 0);
-                    const positions = Object.entries(positionData)
-                        .map(([symbol, data]) => ({
-                            symbol,
-                            volume: data.volume,
-                            percentage: totalVolume > 0 ? (data.volume / totalVolume * 100) : 0
-                        }))
-                        .sort((a, b) => b.volume - a.volume)
-                        .slice(0, 4);
-
-                    // Create PDF
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    const pageWidth = pdf.internal.pageSize.getWidth();
-                    const pageHeight = pdf.internal.pageSize.getHeight();
-                    const margin = 15;
-                    const contentWidth = pageWidth - (margin * 2);
-
-                    // Header
-                    pdf.setFillColor(255, 255, 255);
-                    pdf.rect(0, 0, pageWidth, 40, 'F');
-                    
-                    pdf.setTextColor(0, 0, 0);
-                    pdf.setFontSize(16);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.text('OPLN', margin, 15);
-                    
-                    pdf.setFontSize(10);
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.text('MONTHLY PORTFOLIO REPORT', margin, 22);
-                    
-                    pdf.setFontSize(12);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.text(monthAbbrev + ' ' + year, margin, 30);
-                    
-                    pdf.setFontSize(14);
-                    pdf.text('$' + currentBalance.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}), pageWidth - margin, 30, { align: 'right' });
-                    
-                    pdf.setDrawColor(0, 0, 0);
-                    pdf.setLineWidth(0.5);
-                    pdf.line(margin, 40, pageWidth - margin, 40);
-
-                    let yPos = 50;
-
-                    // Performance Section
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('PERFORMANCE', margin, yPos);
-                    yPos += 8;
-
-                    const performanceData = [
-                        { label: 'MTD', value: (monthNetProfit / (currentBalance - monthNetProfit) * 100).toFixed(2) + '%' },
-                        { label: 'YTD', value: (yearNetProfit / (cachedTotalDeposits || 10000) * 100).toFixed(2) + '%' },
-                        { label: '1Y', value: (oneYearNetProfit / (cachedTotalDeposits || 10000) * 100).toFixed(2) + '%' },
-                        { label: 'SI', value: (siNetProfit / (cachedTotalDeposits || 10000) * 100).toFixed(2) + '%' }
-                    ];
-
-                    performanceData.forEach((item, index) => {
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(9);
-                        pdf.text(item.label, margin, yPos);
-                        pdf.text(item.value, margin + 20, yPos);
-                        yPos += 6;
-                    });
-
-                    yPos += 10;
-
-                    // Risk & Performance Section
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('RISK & PERFORMANCE', margin + 80, yPos - 38);
-
-                    const riskData = [
-                        { label: 'Sharpe', value: sharpeRatio.toFixed(2) },
-                        { label: 'Max DD', value: maxDrawdown.toFixed(2) + '%' },
-                        { label: 'PF', value: isFinite(monthProfitFactor) ? monthProfitFactor.toFixed(2) : '∞' },
-                        { label: 'Win Rate', value: monthWinRate.toFixed(1) + '%' }
-                    ];
-
-                    let riskYPos = yPos - 32;
-                    riskData.forEach((item, index) => {
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(9);
-                        pdf.text(item.label, margin + 80, riskYPos);
-                        pdf.text(item.value, margin + 100, riskYPos);
-                        riskYPos += 6;
-                    });
-
-                    yPos = riskYPos + 10;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Equity Curve placeholder
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('EQUITY CURVE', margin, yPos);
-                    yPos += 30;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Portfolio Positioning and Trading Activity
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('PORTFOLIO POSITIONING', margin, yPos);
-                    yPos += 8;
-
-                    positions.forEach(pos => {
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(9);
-                        pdf.text(pos.symbol, margin, yPos);
-                        pdf.text(pos.percentage.toFixed(0) + '%', margin + 30, yPos);
-                        yPos += 6;
-                    });
-
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('TRADING ACTIVITY', margin + 80, yPos - 24);
-
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(9);
-                    pdf.text(monthTrades.length + ' Trades', margin + 80, yPos - 18);
-                    pdf.text(monthWinners.length + ' Winners / ' + monthLosers.length + ' Losers', margin + 80, yPos - 12);
-                    pdf.text('PF ' + (isFinite(monthProfitFactor) ? monthProfitFactor.toFixed(2) : '∞'), margin + 80, yPos - 6);
-
-                    yPos += 10;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Monthly Returns
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('MONTHLY RETURNS', margin, yPos);
-                    yPos += 8;
-
-                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    const monthlyReturns = {};
-                    
-                    // Calculate monthly returns for the year
-                    for (let m = 0; m < 12; m++) {
-                        const monthTrades = processedList.filter(item => 
-                            item.date.getFullYear() === year && item.date.getMonth() === m && !item.isFunding
-                        );
-                        if (monthTrades.length > 0) {
-                            const monthProfit = monthTrades.reduce((sum, item) => sum + item.profit, 0);
-                            monthlyReturns[m] = monthProfit;
-                        } else {
-                            monthlyReturns[m] = 0;
-                        }
-                    }
-
-                    let monthX = margin;
-                    months.forEach((monthName, m) => {
-                        const returnValue = monthlyReturns[m] || 0;
-                        const returnPercent = cachedTotalDeposits > 0 ? (returnValue / cachedTotalDeposits * 100).toFixed(1) : '0.0';
-                        
-                        // Highlight the selected month
-                        if (m === month - 1) {
-                            pdf.setFillColor(16, 185, 129); // Green highlight
-                            pdf.rect(monthX - 2, yPos - 6, 12, 12, 'F');
-                            pdf.setTextColor(255, 255, 255); // White text
-                        } else {
-                            pdf.setTextColor(0, 0, 0); // Black text
-                        }
-                        
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(8);
-                        pdf.text(monthName, monthX, yPos);
-                        pdf.text(returnPercent + '%', monthX, yPos + 5);
-                        monthX += 14;
-                    });
-                    
-                    // Reset text color for remaining sections
-                    pdf.setTextColor(0, 0, 0);
-
-                    yPos += 15;
-
-                    // Divider
-                    pdf.setDrawColor(200, 200, 200);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    yPos += 10;
-
-                    // Manager Commentary
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('MANAGER COMMENTARY', margin, yPos);
-                    yPos += 8;
-
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(8);
-                    pdf.text('Short explanation', margin, yPos);
-                    yPos += 15;
-
-                    // Current Position
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(10);
-                    pdf.text('CURRENT POSITION:', margin + 80, yPos - 20);
-                    
-                    const positionStatus = Math.abs(maxDrawdown) < 5 ? 'NORMAL' : Math.abs(maxDrawdown) < 15 ? 'MODERATE' : 'ELEVATED';
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(8);
-                    pdf.text(positionStatus, margin + 80, yPos - 15);
-
-                    // Footer
-                    pdf.setFillColor(245, 245, 245);
-                    pdf.rect(0, pageHeight - 20, pageWidth, 20, 'F');
-                    
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(7);
-                    pdf.setTextColor(100, 100, 100);
-                    pdf.text('Generated: ' + new Date().toLocaleString(), margin, pageHeight - 12);
-                    pdf.text('© ROWRIC Quantitative Trading System', pageWidth - margin, pageHeight - 12, { align: 'right' });
-
-                    // Save PDF
-                    const fileName = `OPLN_Monthly_Report_${monthAbbrev}_${year}.pdf`;
-                    pdf.save(fileName);
-
-                } catch (error) {
-                    console.error('Error generating monthly report:', error);
-                    alert('Error generating monthly report: ' + error.message);
+                // Show report generator section
+                const reportGeneratorSection = document.getElementById('report-generator-section');
+                if (reportGeneratorSection) {
+                    reportGeneratorSection.style.display = '';
+                    reportGeneratorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
 
@@ -6379,60 +6089,4 @@
                     const pdfHeight = 210;
                     
                     const pdf = new jsPDF('l', 'mm', 'a4');
-                    
-                    // Set entire PDF background to black
-                    pdf.setFillColor(0, 0, 0);
-                    pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-                    
-                    // Calculate image dimensions to fill the page
-                    const imgWidth = pdfWidth;
-                    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-                    
-                    let finalWidth = imgWidth;
-                    let finalHeight = imgHeight;
-                    let xOffset = 0;
-                    let yOffset = 0;
-                    
-                    // Scale down if content is too tall
-                    if (imgHeight > pdfHeight) {
-                        const scale = pdfHeight / imgHeight;
-                        finalWidth = imgWidth * scale;
-                        finalHeight = pdfHeight;
-                        xOffset = (pdfWidth - finalWidth) / 2; // Center horizontally
-                    }
-                    
-                    pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
-
-                    // Generate date range for filename
-                    const formatDate = (date) => {
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        const d = new Date(date);
-                        const day = String(d.getDate()).padStart(2, '0');
-                        const month = months[d.getMonth()];
-                        const year = d.getFullYear();
-                        return `${day}.${month}.${year}`;
-                    };
-
-                    const allDates = effectiveList.map(item => item.date).filter(d => d);
-                    const fromDate = allDates.length > 0 ? new Date(Math.min(...allDates)) : new Date();
-                    const toDate = allDates.length > 0 ? new Date(Math.max(...allDates)) : new Date();
-
-                    const fileName = `ROWRIC Trading Transaction From ${formatDate(fromDate)} to ${formatDate(toDate)}.pdf`;
-                    pdf.save(fileName);
-
-                    console.log('PDF saved successfully');
-                    
-                } catch (error) {
-                    console.error('Error during PDF export:', error);
-                    alert('Error generating PDF: ' + error.message);
-                } finally {
-                    // Remove temporary container
-                    const tempContainer = document.getElementById('pdf-export-container');
-                    if (tempContainer) {
-                        document.body.removeChild(tempContainer);
-                    }
-                }
-            }
-        </script>
-    </body>
-    </html> 
+               
