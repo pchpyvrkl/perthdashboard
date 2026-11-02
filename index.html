@@ -6089,4 +6089,60 @@
                     const pdfHeight = 210;
                     
                     const pdf = new jsPDF('l', 'mm', 'a4');
-               
+                    
+                    // Set entire PDF background to black
+                    pdf.setFillColor(0, 0, 0);
+                    pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+                    
+                    // Calculate image dimensions to fill the page
+                    const imgWidth = pdfWidth;
+                    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+                    
+                    let finalWidth = imgWidth;
+                    let finalHeight = imgHeight;
+                    let xOffset = 0;
+                    let yOffset = 0;
+                    
+                    // Scale down if content is too tall
+                    if (imgHeight > pdfHeight) {
+                        const scale = pdfHeight / imgHeight;
+                        finalWidth = imgWidth * scale;
+                        finalHeight = pdfHeight;
+                        xOffset = (pdfWidth - finalWidth) / 2; // Center horizontally
+                    }
+                    
+                    pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+
+                    // Generate date range for filename
+                    const formatDate = (date) => {
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const d = new Date(date);
+                        const day = String(d.getDate()).padStart(2, '0');
+                        const month = months[d.getMonth()];
+                        const year = d.getFullYear();
+                        return `${day}.${month}.${year}`;
+                    };
+
+                    const allDates = effectiveList.map(item => item.date).filter(d => d);
+                    const fromDate = allDates.length > 0 ? new Date(Math.min(...allDates)) : new Date();
+                    const toDate = allDates.length > 0 ? new Date(Math.max(...allDates)) : new Date();
+
+                    const fileName = `ROWRIC Trading Transaction From ${formatDate(fromDate)} to ${formatDate(toDate)}.pdf`;
+                    pdf.save(fileName);
+
+                    console.log('PDF saved successfully');
+                    
+                } catch (error) {
+                    console.error('Error during PDF export:', error);
+                    alert('Error generating PDF: ' + error.message);
+                } finally {
+                    // Remove temporary container
+                    const tempContainer = document.getElementById('pdf-export-container');
+                    if (tempContainer) {
+                        document.body.removeChild(tempContainer);
+                    }
+                }
+            }
+        </script>
+    </body>
+    </html>    
