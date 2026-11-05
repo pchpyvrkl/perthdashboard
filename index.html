@@ -108,10 +108,8 @@
             .val-neg { color:#FF4545; }
             .val-neutral { color:#858585; }
 
-            /* Scrolling markets ticker */
-            #ticker-track { display: flex; width: max-content; animation: tickerScroll 45s linear infinite; }
-            #ticker-bar:hover #ticker-track { animation-play-state: paused; }
-            @keyframes tickerScroll { to { transform: translateX(-50%); } }
+            /* Scrolling markets ticker (JS-driven for exact wrap) */
+            #ticker-track { display: flex; width: max-content; will-change: transform; }
 
             .chart-label {
                 position: absolute;
@@ -1253,23 +1251,73 @@
                 { label: 'DXY',    sym: 'DX-Y.NYB', yield: false }
             ];
 
+            function makeTickerSet() {
+                const set = document.createElement('div');
+                set.className = 'flex items-center gap-5 pr-5 shrink-0';
+                MARKET_TICKERS.forEach(t => {
+                    const span = document.createElement('span');
+                    span.className = 'shrink-0';
+                    span.dataset.ticker = t.label;
+                    span.innerHTML = `<span class="text-terminalMuted">${t.label}</span> <b class="tk-price text-terminalText">--</b> <b class="tk-chg val-neutral">--</b>`;
+                    set.appendChild(span);
+                });
+                return set;
+            }
+
             function buildTickerBar() {
                 const track = document.getElementById('ticker-track');
                 if (!track || track.dataset.built) return;
-                // Two identical sets — track translates -50% for a seamless loop
-                for (let copy = 0; copy < 2; copy++) {
-                    const set = document.createElement('div');
-                    set.className = 'flex items-center gap-5 pr-5 shrink-0';
-                    MARKET_TICKERS.forEach(t => {
-                        const span = document.createElement('span');
-                        span.className = 'shrink-0';
-                        span.dataset.ticker = t.label;
-                        span.innerHTML = `<span class="text-terminalMuted">${t.label}</span> <b class="tk-price text-terminalText">--</b> <b class="tk-chg val-neutral">--</b>`;
-                        set.appendChild(span);
-                    });
-                    track.appendChild(set);
-                }
+                track.appendChild(makeTickerSet());
+                track.appendChild(makeTickerSet());
                 track.dataset.built = '1';
+
+                const bar = document.getElementById('ticker-bar');
+                if (bar && !bar.dataset.hoverBound) {
+                    bar.addEventListener('mouseenter', () => { tickerPaused = true; });
+                    bar.addEventListener('mouseleave', () => { tickerPaused = false; });
+                    bar.dataset.hoverBound = '1';
+                }
+                startTickerScroll();
+            }
+
+            // Duplicate sets until the track covers viewport + one full set,
+            // so the wrap point never shows blank space
+            function ensureTickerSets() {
+                const track = document.getElementById('ticker-track');
+                if (!track || !track.children.length) return;
+                const setWidth = track.children[0].offsetWidth;
+                const viewport = track.parentElement ? track.parentElement.clientWidth : 0;
+                if (!setWidth || !viewport) return;
+                let guard = 0;
+                while (track.scrollWidth < viewport + setWidth && guard++ < 20) {
+                    track.appendChild(makeTickerSet());
+                }
+            }
+
+            let tickerScrollRAF = null;
+            let tickerScrollX = 0;
+            let tickerPaused = false;
+
+            function startTickerScroll() {
+                if (tickerScrollRAF) return;
+                const SPEED = 45; // px per second
+                let last = performance.now();
+                const tick = (now) => {
+                    const dt = Math.min(0.1, (now - last) / 1000);
+                    last = now;
+                    const track = document.getElementById('ticker-track');
+                    if (track) {
+                        ensureTickerSets();
+                        const setWidth = track.children[0] ? track.children[0].offsetWidth : 0;
+                        if (setWidth > 0 && !tickerPaused) {
+                            tickerScrollX -= SPEED * dt;
+                            if (tickerScrollX <= -setWidth) tickerScrollX += setWidth;
+                            track.style.transform = `translateX(${tickerScrollX}px)`;
+                        }
+                    }
+                    tickerScrollRAF = requestAnimationFrame(tick);
+                };
+                tickerScrollRAF = requestAnimationFrame(tick);
             }
 
             function loadTickerCache() {
