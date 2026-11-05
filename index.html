@@ -1272,10 +1272,37 @@
                 track.dataset.built = '1';
             }
 
+            function loadTickerCache() {
+                try { return JSON.parse(localStorage.getItem('rowric_ticker_quotes') || '{}'); } catch (e) { return {}; }
+            }
+            function saveTickerCache(map) {
+                try { localStorage.setItem('rowric_ticker_quotes', JSON.stringify(map)); } catch (e) {}
+            }
+
+            function applyTickerValues(els, priceText, chgText, chgClass) {
+                els.forEach(el => {
+                    el.querySelector('.tk-price').textContent = priceText;
+                    const chgEl = el.querySelector('.tk-chg');
+                    chgEl.textContent = chgText;
+                    chgEl.className = chgClass;
+                });
+            }
+
             async function fetchTickerQuotes() {
                 buildTickerBar();
                 const bar = document.getElementById('ticker-bar');
                 if (!bar) return;
+
+                // Paint cached values instantly so the bar is never '--' after first success
+                const cache = loadTickerCache();
+                MARKET_TICKERS.forEach(t => {
+                    const c = cache[t.label];
+                    if (c) {
+                        const els = bar.querySelectorAll(`[data-ticker="${t.label}"]`);
+                        if (els.length) applyTickerValues(els, c.p, c.c, c.cls);
+                    }
+                });
+
                 const results = await Promise.allSettled(
                     MARKET_TICKERS.map(t => fetchYahooJson(t.sym, '1d', '1d'))
                 );
@@ -1310,19 +1337,17 @@
                         }
                     }
 
-                    els.forEach(el => {
-                        el.querySelector('.tk-price').textContent = priceText;
-                        const chgEl = el.querySelector('.tk-chg');
-                        chgEl.textContent = chgText;
-                        chgEl.className = chgClass;
-                    });
+                    cache[t.label] = { p: priceText, c: chgText, cls: chgClass };
+                    applyTickerValues(els, priceText, chgText, chgClass);
                 });
+                saveTickerCache(cache);
             }
 
             // S&P 500 DAILY HISTORY (equity chart overlay — DLY/MTH/YR only)
             // ============================================================
             let spxHistory = null;        // { range, byDay:{}, byMonth:{}, byYear:{} }
             let spxHistoryLoading = false;
+            let lastSPXFetch = 0;         // throttle full-history refetches (heavy payload)
 
             async function ensureSPXHistory() {
                 if (spxHistory || spxHistoryLoading || processedList.length === 0) return;
@@ -1330,6 +1355,7 @@
                 const spanDays = Math.max(1, (Date.now() - earliest.getTime()) / 86400000);
                 const range = spanDays <= 200 ? '6mo' : spanDays <= 400 ? '1y' : spanDays <= 800 ? '2y' : spanDays <= 1600 ? '5y' : spanDays <= 3700 ? '10y' : 'max';
                 spxHistoryLoading = true;
+                lastSPXFetch = Date.now();
                 try {
                     const res = await fetchYahooJson('^GSPC', range, '1d');
                     const closes = res?.indicators?.quote?.[0]?.close || [];
@@ -1389,6 +1415,32 @@
                 el.className = `metric-value ${main >= 0 ? 'val-pos' : 'val-neg'}`;
             }
 
+            function saveMacroCache() {
+                try {
+                    localStorage.setItem('rowric_macro', JSON.stringify({
+                        rfr: ANNUAL_RISK_FREE_RATE,
+                        bmk: ANNUAL_BENCHMARK_RETURN
+                    }));
+                } catch (e) {}
+            }
+
+            function restoreMacroCache() {
+                try {
+                    const m = JSON.parse(localStorage.getItem('rowric_macro') || 'null');
+                    if (!m) return;
+                    if (m.rfr) {
+                        ANNUAL_RISK_FREE_RATE = m.rfr;
+                        const el = document.getElementById('rfr-value');
+                        if (el) el.textContent = m.rfr.toFixed(2);
+                    }
+                    if (m.bmk !== undefined) {
+                        ANNUAL_BENCHMARK_RETURN = m.bmk;
+                        const el = document.getElementById('bmk-value');
+                        if (el) el.textContent = m.bmk.toFixed(2);
+                    }
+                } catch (e) {}
+            }
+
             async function fetchMarketMacroRates() {
                 // Fetch both tickers in parallel so one failure doesn't block the other
                 const [tnxRes, spxRes] = await Promise.allSettled([
@@ -1404,6 +1456,7 @@
                         ANNUAL_RISK_FREE_RATE = rfr;
                         const el = document.getElementById('rfr-value');
                         if (el) el.textContent = rfr.toFixed(2);
+                        saveMacroCache();
                     }
                 } else {
                     console.warn('US10Y (^TNX) fetch failed:', tnxRes.reason);
@@ -1419,6 +1472,7 @@
                             ANNUAL_BENCHMARK_RETURN = bmk;
                             const el = document.getElementById('bmk-value');
                             if (el) el.textContent = bmk.toFixed(2);
+                            saveMacroCache();
                         }
                     }
                 } else {
@@ -1610,14 +1664,18 @@
                 setInterval(() => fetchAndParseCSV(false), 15000);
                 fetchNewsCalendar();
                 setInterval(fetchNewsCalendar, 5 * 60 * 1000); // economic calendar rarely changes — 5 min is plenty
+                restoreMacroCache();
                 fetchMarketMacroRates();
                 fetchTickerQuotes();
                 setInterval(() => {
                     fetchMarketMacroRates();
                     fetchTickerQuotes();
-                    spxHistory = null;      // force refetch of S&P 500 daily history
-                    ensureSPXHistory();
-                }, 5 * 60 * 1000); // refresh all Yahoo data every 5 min
+                    // Full SPX history is a heavy payload — only refetch every 6h (daily closes barely move intraday)
+                    if (Date.now() - lastSPXFetch > 6 * 60 * 60 * 1000) {
+                        spxHistory = null;
+                        ensureSPXHistory();
+                    }
+                }, 5 * 60 * 1000); // refresh quotes every 5 min
             };
 
             // ============================================================
