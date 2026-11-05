@@ -66,6 +66,13 @@
             ::-webkit-scrollbar-thumb { background: #383838; border-radius: 0; }
             ::-webkit-scrollbar-thumb:hover { background: #585858; }
 
+            /* Main page scrollbar — auto-hides when idle */
+            #main-content { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+            #main-content.is-scrolling { scrollbar-color: #383838 transparent; }
+            #main-content::-webkit-scrollbar-thumb { background: transparent; }
+            #main-content.is-scrolling::-webkit-scrollbar-thumb { background: #383838; }
+            #main-content.is-scrolling::-webkit-scrollbar-thumb:hover { background: #585858; }
+
             button{ font-family:inherit; cursor:pointer; }
             :focus-visible{ outline:1px solid #FFB000; outline-offset:1px; }
             @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
@@ -1704,7 +1711,16 @@
             window.onload = function () {
                 // Initialize overview view as default
                 initializeOverview();
-                
+
+                // Auto-hide page scrollbar when idle
+                const mainEl = document.getElementById('main-content');
+                let scrollHideTimer = null;
+                mainEl.addEventListener('scroll', () => {
+                    mainEl.classList.add('is-scrolling');
+                    clearTimeout(scrollHideTimer);
+                    scrollHideTimer = setTimeout(() => mainEl.classList.remove('is-scrolling'), 900);
+                });
+
                 updateWorldClocks();
                 setInterval(updateWorldClocks, 1000);
                 fetchAndParseCSV(true);
