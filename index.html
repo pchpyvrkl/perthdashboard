@@ -96,9 +96,22 @@
             .metric-label { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:#858585; font-weight:700; margin-bottom:0.1rem; }
             .metric-value { font-size:1.1rem; font-weight:900; font-variant-numeric: tabular-nums; }
             @media(min-width:640px){ .metric-value { font-size:1.2rem; } }
+
+            /* Compact top metric strip — always fills screen width */
+            #metrics-section { display: flex; flex-wrap: wrap; gap: 6px !important; width: 100%; padding-bottom: 4px !important; }
+            #metrics-section .metric-card { padding: 0.15rem 0.6rem !important; min-height: 0 !important; gap: 0 !important; flex: 1 1 0; }
+            #metrics-section .metric-label { font-size: 9px !important; letter-spacing: .08em !important; margin-bottom: 0 !important; white-space: nowrap; }
+            #metrics-section .metric-value { font-size: 0.95rem !important; line-height: 1.15 !important; }
+            @media(min-width:640px){ #metrics-section .metric-value { font-size: 1.05rem !important; } }
+            @media(min-width:1280px){ #metrics-section .metric-value { font-size: 1.15rem !important; } }
             .val-pos { color:#00C853; }
             .val-neg { color:#FF4545; }
             .val-neutral { color:#858585; }
+
+            /* Scrolling markets ticker */
+            #ticker-track { display: flex; width: max-content; animation: tickerScroll 45s linear infinite; }
+            #ticker-bar:hover #ticker-track { animation-play-state: paused; }
+            @keyframes tickerScroll { to { transform: translateX(-50%); } }
 
             .chart-label {
                 position: absolute;
@@ -536,6 +549,10 @@
 
             <!-- Top Metric Cards -->
             <div id="metrics-section" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1 border-b border-terminalBorder pb-2">
+                <div id="ticker-bar" class="flex items-center gap-5 text-[10px] font-mono whitespace-nowrap border-b border-terminalBorder pb-1 mb-1" style="flex-basis:100%;">
+                    <span class="text-terminalMuted uppercase tracking-widest font-bold shrink-0">MARKETS:</span>
+                    <div class="flex-1 overflow-hidden"><div id="ticker-track"></div></div>
+                </div>
                 <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
                     <p class="metric-label">GAIN (TWR)</p>
                     <p id="metric-twr-gain" class="metric-value val-pos">--%</p>
@@ -575,6 +592,10 @@
                     </div>
                     <p id="metric-unrealized-pl" class="metric-value val-neutral">$--</p>
                 </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">S&amp;P 500 RETURN</p>
+                    <p id="metric-spx-return" class="metric-value val-neutral">--%</p>
+                </div>
             </div>
 
             <!-- Main Chart & Sidebar Analytics (toggles between Equity Chart and US News) -->
@@ -595,8 +616,8 @@
                                     <button onclick="changeChartType('balance')" id="btn-chart-balance" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">BAL $</button>
                                 </div>
                                 <div class="flex gap-1 bg-terminalBlack p-1 border border-terminalBorder">
-                                    <button onclick="changePeriodMode('trade')" id="btn-period-trade" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText">TRD</button>
-                                    <button onclick="changePeriodMode('daily')" id="btn-period-daily" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">DLY</button>
+                                    <button onclick="changePeriodMode('trade')" id="btn-period-trade" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">TRD</button>
+                                    <button onclick="changePeriodMode('daily')" id="btn-period-daily" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber">DLY</button>
                                     <button onclick="changePeriodMode('monthly')" id="btn-period-monthly" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">MTH</button>
                                     <button onclick="changePeriodMode('yearly')" id="btn-period-yearly" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">YR</button>
                                 </div>
@@ -768,6 +789,8 @@
                         <button class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder" id="pl-cal-total-btn" onclick="setPLCalendarTimeframe('total')">Total</button>
                         <select id="pl-cal-year-select" class="px-2 py-1 text-[10px] font-bold bg-terminalBlack text-terminalText border border-terminalBorder cursor-pointer" onchange="selectPLCalendarYear(this.value)">
                         </select>
+                        <select id="pl-cal-month-select" class="px-2 py-1 text-[10px] font-bold bg-terminalBlack text-terminalText border border-terminalBorder cursor-pointer" onchange="selectPLCalendarMonth(this.value)">
+                        </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-1 mb-4">
@@ -826,19 +849,14 @@
                 <div class="flex items-center gap-6 mt-4 flex-wrap">
                     <div class="flex items-center gap-2">
                         <label class="text-[9px] text-terminalMuted uppercase tracking-widest font-bold whitespace-nowrap">US10Y / RFR %</label>
-                        <input id="rfr-input" type="number" step="0.01" min="0" max="20"
-                            class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 focus:outline-none focus:border-terminalAmber text-center font-mono"
-                            onchange="updateRFR(this.value)" />
-                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">ANNUAL</span>
+                        <span id="rfr-value" class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 text-center font-mono">--</span>
+                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">ANNUAL · LIVE</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label class="text-[9px] text-terminalMuted uppercase tracking-widest font-bold whitespace-nowrap">BENCHMARK RETURN %</label>
-                        <input id="bmk-input" type="number" step="0.1" min="-50" max="100"
-                            class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 focus:outline-none focus:border-terminalAmber text-center font-mono"
-                            onchange="updateBenchmark(this.value)" />
-                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">ANNUAL</span>
+                        <label class="text-[9px] text-terminalMuted uppercase tracking-widest font-bold whitespace-nowrap">BENCHMARK RETURN % (S&amp;P 500)</label>
+                        <span id="bmk-value" class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 text-center font-mono">--</span>
+                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">TRAILING 1Y · LIVE</span>
                     </div>
-                    <p class="text-[9px] text-terminalMuted uppercase tracking-widest">EDIT INPUTS THEN PRESS ENTER / TAB TO RECOMPUTE METRICS</p>
                 </div>
             </div>
 
@@ -1079,9 +1097,9 @@
             const SPREADSHEET_ID = "2PACX-1vQQj8EzNYOAPc70wbmz--2hiq1tfeH76njnadmTVs-3UZIxH7JDcJuXzhDQeRw4Ee3hEtFbyYJP2yNg";
             const OPEN_TRADES_GID = "1116835953";
 
-            // Macro assumptions — mutable via UI controls
-            let ANNUAL_RISK_FREE_RATE = 4.48;   // %  (US10Y proxy, user-adjustable)
-            let ANNUAL_BENCHMARK_RETURN = 10.0; // %  (S&P500 proxy, user-adjustable)
+            // Macro rates — populated exclusively from live Yahoo Finance data (^TNX / ^GSPC)
+            let ANNUAL_RISK_FREE_RATE = 0;   // %  (US10Y yield, live)
+            let ANNUAL_BENCHMARK_RETURN = 0;  // %  (S&P500 trailing 1Y return, live)
             const REBATE_PER_LOT = 7; // $ per lot
 
             // ============================================================
@@ -1099,7 +1117,7 @@
             let attributionChartInstance = null, hourlyChartInstance = null, dailyPatternChartInstance = null, mcChartInstance = null;
             let drawdownDistributionChartInstance = null;
             let activeChartType = 'gain';
-            let activePeriodMode = 'trade';
+            let activePeriodMode = 'daily';
             let gainCalculationMethod = 'compounded';
             let portfolioDataChecksum = '';
             let financialPrivacyEnabled = false;
@@ -1164,9 +1182,255 @@
                 }
             }
 
-            // Sync inputs to initial values
-            document.getElementById('rfr-input').value = ANNUAL_RISK_FREE_RATE.toFixed(2);
-            document.getElementById('bmk-input').value = ANNUAL_BENCHMARK_RETURN.toFixed(2);
+            // ============================================================
+            // LIVE MACRO RATES (Yahoo Finance via CORS proxies)
+            // RFR  = US10Y yield  (^TNX)
+            // BENCH= S&P 500 1Y return (^GSPC)
+            // ============================================================
+            const YAHOO_CHART_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+            const MACRO_FETCHERS = [
+                // 1) Direct — Yahoo chart API sends Access-Control-Allow-Origin: *
+                (url) => fetch(url, { headers: { 'Accept': 'application/json' } }),
+                // 2) CORS proxies as fallback
+                ...[
+                    'https://corsproxy.io/?',
+                    'https://api.allorigins.win/raw?url=',
+                    'https://api.codetabs.com/v1/proxy?quest=',
+                    'https://api.allorigins.win/get?url=',
+                    'https://cors-anywhere.herokuapp.com/'
+                ].map((proxy) => (url) => fetch(proxy + encodeURIComponent(url), { headers: { 'Accept': 'application/json' } }))
+            ];
+
+            async function fetchYahooJson(symbol, range, interval) {
+                const target = `${YAHOO_CHART_BASE}${encodeURIComponent(symbol)}?range=${range}&interval=${interval}&includePrePost=false`;
+                let lastError = null;
+                for (const doFetch of MACRO_FETCHERS) {
+                    try {
+                        const response = await doFetch(target);
+                        if (!response.ok) { lastError = new Error(`HTTP ${response.status}`); continue; }
+                        let text = await response.text();
+                        // allorigins /get wraps payload in JSON { contents: ... }
+                        if (text.trim().startsWith('{') && !text.includes('"chart"')) {
+                            try { const wrapped = JSON.parse(text); if (wrapped && typeof wrapped.contents === 'string') text = wrapped.contents; } catch (_) {}
+                        }
+                        const json = JSON.parse(text);
+                        const result = json?.chart?.result?.[0];
+                        if (result && result.meta) return result;
+                        lastError = new Error('Empty chart result');
+                    } catch (e) { lastError = e; }
+                }
+                throw lastError || new Error('All fetchers failed');
+            }
+
+            function latestClose(result) {
+                const closes = result?.indicators?.quote?.[0]?.close || [];
+                for (let i = closes.length - 1; i >= 0; i--) {
+                    if (typeof closes[i] === 'number' && isFinite(closes[i])) return closes[i];
+                }
+                return null;
+            }
+
+            function firstValidClose(result) {
+                const closes = result?.indicators?.quote?.[0]?.close || [];
+                for (const c of closes) {
+                    if (typeof c === 'number' && isFinite(c)) return c;
+                }
+                return null;
+            }
+
+            // ============================================================
+            // ============================================================
+            // LIVE MARKET TICKER (Yahoo Finance — overview top bar)
+            // ============================================================
+            const MARKET_TICKERS = [
+                { label: 'XAUUSD', sym: 'GC=F',  yield: false },
+                { label: 'WTI',    sym: 'CL=F',  yield: false },
+                { label: 'US10Y',  sym: '^TNX',  yield: true },
+                { label: 'US03M',  sym: '^IRX',  yield: true },
+                { label: 'SPX',    sym: '^GSPC', yield: false },
+                { label: 'NDX',    sym: '^NDX',  yield: false },
+                { label: 'DXY',    sym: 'DX-Y.NYB', yield: false }
+            ];
+
+            function buildTickerBar() {
+                const track = document.getElementById('ticker-track');
+                if (!track || track.dataset.built) return;
+                // Two identical sets — track translates -50% for a seamless loop
+                for (let copy = 0; copy < 2; copy++) {
+                    const set = document.createElement('div');
+                    set.className = 'flex items-center gap-5 pr-5 shrink-0';
+                    MARKET_TICKERS.forEach(t => {
+                        const span = document.createElement('span');
+                        span.className = 'shrink-0';
+                        span.dataset.ticker = t.label;
+                        span.innerHTML = `<span class="text-terminalMuted">${t.label}</span> <b class="tk-price text-terminalText">--</b> <b class="tk-chg val-neutral">--</b>`;
+                        set.appendChild(span);
+                    });
+                    track.appendChild(set);
+                }
+                track.dataset.built = '1';
+            }
+
+            async function fetchTickerQuotes() {
+                buildTickerBar();
+                const bar = document.getElementById('ticker-bar');
+                if (!bar) return;
+                const results = await Promise.allSettled(
+                    MARKET_TICKERS.map(t => fetchYahooJson(t.sym, '1d', '1d'))
+                );
+                results.forEach((res, i) => {
+                    const t = MARKET_TICKERS[i];
+                    const els = bar.querySelectorAll(`[data-ticker="${t.label}"]`);
+                    if (!els.length) return;
+
+                    let priceText = '--', chgText = '--', chgClass = 'tk-chg val-neutral';
+                    if (res.status === 'fulfilled') {
+                        const meta = res.value?.meta || {};
+                        let price = meta.regularMarketPrice;
+                        let prev = meta.chartPreviousClose;
+                        if (typeof price === 'number' && isFinite(price)) {
+                            // Yahoo quotes ^TNX/^IRX as yield x10
+                            if (t.yield && price > 15) price = price / 10;
+                            if (typeof prev === 'number' && isFinite(prev) && t.yield && prev > 15) prev = prev / 10;
+
+                            priceText = t.yield ? price.toFixed(2) + '%' : price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                            if (typeof prev === 'number' && isFinite(prev) && prev !== 0) {
+                                const diff = price - prev;
+                                const pct = (diff / prev) * 100;
+                                if (t.yield) {
+                                    // yields: show absolute change in percentage points
+                                    chgText = (diff >= 0 ? '+' : '') + diff.toFixed(2);
+                                } else {
+                                    chgText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+                                }
+                                chgClass = `tk-chg ${diff >= 0 ? 'val-pos' : 'val-neg'}`;
+                            }
+                        }
+                    }
+
+                    els.forEach(el => {
+                        el.querySelector('.tk-price').textContent = priceText;
+                        const chgEl = el.querySelector('.tk-chg');
+                        chgEl.textContent = chgText;
+                        chgEl.className = chgClass;
+                    });
+                });
+            }
+
+            // S&P 500 DAILY HISTORY (equity chart overlay — DLY/MTH/YR only)
+            // ============================================================
+            let spxHistory = null;        // { range, byDay:{}, byMonth:{}, byYear:{} }
+            let spxHistoryLoading = false;
+
+            async function ensureSPXHistory() {
+                if (spxHistory || spxHistoryLoading || processedList.length === 0) return;
+                const earliest = processedList[0].date;
+                const spanDays = Math.max(1, (Date.now() - earliest.getTime()) / 86400000);
+                const range = spanDays <= 200 ? '6mo' : spanDays <= 400 ? '1y' : spanDays <= 800 ? '2y' : spanDays <= 1600 ? '5y' : spanDays <= 3700 ? '10y' : 'max';
+                spxHistoryLoading = true;
+                try {
+                    const res = await fetchYahooJson('^GSPC', range, '1d');
+                    const closes = res?.indicators?.quote?.[0]?.close || [];
+                    const ts = res?.timestamp || [];
+                    const byDay = {}, byMonth = {}, byYear = {};
+                    for (let i = 0; i < ts.length; i++) {
+                        const c = closes[i];
+                        if (typeof c !== 'number' || !isFinite(c)) continue;
+                        const iso = new Date(ts[i] * 1000).toISOString().split('T')[0];
+                        byDay[iso] = c;
+                        byMonth[iso.slice(0, 7)] = c;  // timestamps ascend — last trading day of period wins
+                        byYear[iso.slice(0, 4)] = c;
+                    }
+                    spxHistory = { range, byDay, byMonth, byYear, dates: Object.keys(byDay).sort() };
+                    updateSPXBenchmarkMetric();
+                } catch (e) {
+                    console.warn('S&P500 history fetch failed:', e);
+                    spxHistory = { range, byDay: {}, byMonth: {}, byYear: {}, dates: [] }; // avoid retry spam
+                } finally {
+                    spxHistoryLoading = false;
+                }
+            }
+
+            // S&P 500 return shown as "+since portfolio start% (+YTD%)"
+            function updateSPXBenchmarkMetric() {
+                const el = document.getElementById('metric-spx-return');
+                if (!el || !spxHistory || !spxHistory.dates || spxHistory.dates.length === 0) return;
+                const dates = spxHistory.dates;
+                const lastClose = spxHistory.byDay[dates[dates.length - 1]];
+                if (!lastClose) return;
+                const fmt = (r) => (r >= 0 ? '+' : '') + r.toFixed(2) + '%';
+
+                // YTD: last trading day of prior year → latest close
+                const yearStart = `${new Date().getFullYear()}-01-01`;
+                let firstIdx = dates.findIndex(d => d >= yearStart);
+                if (firstIdx < 0) firstIdx = dates.length - 1;
+                const ytdBase = spxHistory.byDay[dates[Math.max(0, firstIdx - 1)]];
+                const ytd = ytdBase ? ((lastClose - ytdBase) / ytdBase) * 100 : null;
+
+                // Since portfolio start: last trading day on/before first trade → latest close
+                let startRet = null;
+                if (processedList.length > 0) {
+                    const earliestIso = processedList[0].date.toISOString().split('T')[0];
+                    let baseIdx = -1;
+                    for (let i = dates.length - 1; i >= 0; i--) {
+                        if (dates[i] <= earliestIso) { baseIdx = i; break; }
+                    }
+                    const startBase = baseIdx >= 0 ? spxHistory.byDay[dates[baseIdx]] : null;
+                    if (startBase) startRet = ((lastClose - startBase) / startBase) * 100;
+                }
+
+                if (startRet === null && ytd === null) return;
+                const main = startRet !== null ? startRet : ytd;
+                el.textContent = startRet !== null
+                    ? `${fmt(startRet)}${ytd !== null ? ` (${fmt(ytd)})` : ''}`
+                    : fmt(ytd);
+                el.className = `metric-value ${main >= 0 ? 'val-pos' : 'val-neg'}`;
+            }
+
+            async function fetchMarketMacroRates() {
+                // Fetch both tickers in parallel so one failure doesn't block the other
+                const [tnxRes, spxRes] = await Promise.allSettled([
+                    fetchYahooJson('^TNX', '5d', '1d'),
+                    fetchYahooJson('^GSPC', '1y', '1d')
+                ]);
+
+                // US10Y yield — ^TNX is quoted by Yahoo as yield x10 (e.g. 44.5 = 4.45%)
+                if (tnxRes.status === 'fulfilled') {
+                    let rfr = latestClose(tnxRes.value) ?? tnxRes.value?.meta?.regularMarketPrice ?? null;
+                    if (rfr !== null && rfr > 15) rfr = rfr / 10;
+                    if (rfr !== null && isFinite(rfr) && rfr >= 0 && rfr <= 20) {
+                        ANNUAL_RISK_FREE_RATE = rfr;
+                        const el = document.getElementById('rfr-value');
+                        if (el) el.textContent = rfr.toFixed(2);
+                    }
+                } else {
+                    console.warn('US10Y (^TNX) fetch failed:', tnxRes.reason);
+                }
+
+                // S&P 500 trailing 1-year return — ^GSPC
+                if (spxRes.status === 'fulfilled') {
+                    const spxFirst = firstValidClose(spxRes.value);
+                    const spxLast = latestClose(spxRes.value) ?? spxRes.value?.meta?.regularMarketPrice ?? null;
+                    if (spxFirst && spxLast && spxFirst > 0) {
+                        const bmk = ((spxLast - spxFirst) / spxFirst) * 100;
+                        if (isFinite(bmk)) {
+                            ANNUAL_BENCHMARK_RETURN = bmk;
+                            const el = document.getElementById('bmk-value');
+                            if (el) el.textContent = bmk.toFixed(2);
+                        }
+                    }
+                } else {
+                    console.warn('S&P500 (^GSPC) fetch failed:', spxRes.reason);
+                }
+
+                // Recompute dependent metrics with the fresh values
+                if (cachedBaseMetrics) {
+                    updateRFRDependentMetrics(cachedBaseMetrics);
+                    updateBenchmarkDependentMetrics(cachedBaseMetrics);
+                }
+                console.log(`Macro rates — US10Y: ${ANNUAL_RISK_FREE_RATE ? ANNUAL_RISK_FREE_RATE.toFixed(2) + '%' : '--'}, S&P500 1Y: ${ANNUAL_BENCHMARK_RETURN ? ANNUAL_BENCHMARK_RETURN.toFixed(2) + '%' : '--'}`);
+            }
 
             // ============================================================
             // PIN LOCK
@@ -1345,6 +1609,14 @@
                 setInterval(() => fetchAndParseCSV(false), 15000);
                 fetchNewsCalendar();
                 setInterval(fetchNewsCalendar, 5 * 60 * 1000); // economic calendar rarely changes — 5 min is plenty
+                fetchMarketMacroRates();
+                fetchTickerQuotes();
+                setInterval(() => {
+                    fetchMarketMacroRates();
+                    fetchTickerQuotes();
+                    spxHistory = null;      // force refetch of S&P 500 daily history
+                    ensureSPXHistory();
+                }, 5 * 60 * 1000); // refresh all Yahoo data every 5 min
             };
 
             // ============================================================
@@ -1906,7 +2178,7 @@
 
                     const summaryRow = document.createElement('tr');
                     summaryRow.className = "bg-zinc-900/80 text-terminalText font-semibold border-t border-terminalBorder";
-                    const totalUnrealizedDisplay = financialPrivacyEnabled ? '$x.xx (x.xx%)' : `$${Math.abs(totalUnrealized).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${totalGainDisplay}`;
+                    const totalUnrealizedDisplay = financialPrivacyEnabled ? '$x.xx' : `$${Math.abs(totalUnrealized).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
                     summaryRow.innerHTML = `
                         <td class="px-4 py-3 text-terminalText" colspan="3">Open Position Summary</td>
                         <td class="px-4 py-3 text-right font-mono text-[11px]">${totalVolume > 0 ? totalVolume.toFixed(2) : '—'}</td>
@@ -2401,7 +2673,9 @@
 
                 // Initialize P/L calendar
                 populateYearSelector();
+                populateMonthSelector();
                 setPLCalendarTimeframe('month');
+                updateSPXBenchmarkMetric();
             }
 
             function getStandardDeviation(array) {
@@ -2751,15 +3025,20 @@
                     ? 'px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber'
                     : 'px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder';
 
-                // Show/hide year selector
+                // Show/hide selectors
                 const yearSelect = document.getElementById('pl-cal-year-select');
+                const monthSelect = document.getElementById('pl-cal-month-select');
                 yearSelect.style.display = timeframe === 'year' ? 'block' : 'none';
+                monthSelect.style.display = timeframe === 'month' ? 'block' : 'none';
 
                 // Initialize defaults
                 const today = new Date();
                 if (timeframe === 'month') {
-                    plSelectedYear = today.getFullYear();
-                    plSelectedMonth = today.getMonth();
+                    if (plSelectedYear === null || plSelectedMonth === null) {
+                        plSelectedYear = today.getFullYear();
+                        plSelectedMonth = today.getMonth();
+                    }
+                    populateMonthSelector();
                 } else if (timeframe === 'year') {
                     plSelectedYear = plSelectedYear || today.getFullYear();
                     plSelectedMonth = null;
@@ -2777,6 +3056,40 @@
                 plSelectedMonth = null;
                 generatePLCalendar();
                 updatePLCalendar();
+            }
+
+            function selectPLCalendarMonth(value) {
+                const [y, m] = value.split('-').map(Number);
+                plSelectedYear = y;
+                plSelectedMonth = m - 1;
+                generatePLCalendar();
+                updatePLCalendar();
+            }
+
+            function populateMonthSelector() {
+                const monthSelect = document.getElementById('pl-cal-month-select');
+                if (!monthSelect) return;
+
+                const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                const monthSet = new Set();
+                processedList.forEach(item => {
+                    monthSet.add(`${item.date.getFullYear()}-${String(item.date.getMonth() + 1).padStart(2, '0')}`);
+                });
+                const now = new Date();
+                monthSet.add(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+
+                const sorted = Array.from(monthSet).sort().reverse();
+                monthSelect.innerHTML = '';
+                sorted.forEach(key => {
+                    const [y, m] = key.split('-').map(Number);
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = `${monthNames[m - 1]} ${y}`;
+                    monthSelect.appendChild(option);
+                });
+
+                const current = `${plSelectedYear}-${String((plSelectedMonth ?? now.getMonth()) + 1).padStart(2, '0')}`;
+                monthSelect.value = monthSet.has(current) ? current : sorted[0];
             }
 
             function populateYearSelector() {
@@ -2955,7 +3268,8 @@
                     const monthTotalPercent = (monthCumulativeFactor - 1) * 100;
                     const monthTotalLabel = document.createElement('div');
                     monthTotalLabel.className = 'month-total';
-                    monthTotalLabel.textContent = (monthTotalPercent >= 0 ? '+' : '') + Math.abs(monthTotalPercent).toFixed(2) + '%';
+                    monthTotalLabel.textContent = (monthTotalPercent >= 0 ? '+' : '-') + Math.abs(monthTotalPercent).toFixed(2) + '%';
+                    monthTotalLabel.style.color = monthTotalPercent >= 0 ? '#00C853' : '#FF4545';
                     header.appendChild(monthTotalLabel);
 
                     columnDiv.appendChild(header);
@@ -3209,7 +3523,7 @@
                     year: 'numeric'
                 });
                 const pl = cell.dataset.pl ? parseFloat(cell.dataset.pl) : 0;
-                tooltip.textContent = `${dateStr} - ${pl >= 0 ? '+' : ''}${Math.abs(pl).toFixed(2)}%`;
+                tooltip.textContent = `${dateStr} - ${pl >= 0 ? '+' : ''}${pl.toFixed(2)}%`;
                 tooltip.style.display = 'block';
                 tooltip.style.left = e.pageX + 10 + 'px';
                 tooltip.style.top = e.pageY - 30 + 'px';
@@ -3599,25 +3913,10 @@
             }
 
             // ============================================================
-            // RFR / BENCHMARK CONTROLS (user-adjustable)
+            // RFR / BENCHMARK (live values — see fetchMarketMacroRates)
             // ============================================================
             // Cached base metrics (RFR-independent)
             let cachedBaseMetrics = null;
-
-            function updateRFR(val) {
-                const v = parseFloat(val);
-                if (!isNaN(v) && v >= 0) {
-                    ANNUAL_RISK_FREE_RATE = v;
-                    if (cachedBaseMetrics) updateRFRDependentMetrics(cachedBaseMetrics);
-                }
-            }
-            function updateBenchmark(val) {
-                const v = parseFloat(val);
-                if (!isNaN(v)) {
-                    ANNUAL_BENCHMARK_RETURN = v;
-                    if (cachedBaseMetrics) updateBenchmarkDependentMetrics(cachedBaseMetrics);
-                }
-            }
 
             function updateRFRDependentMetrics(base) {
                 const monthlyRf = ANNUAL_RISK_FREE_RATE / 100 / 12;
@@ -3734,9 +4033,10 @@
                 // Use shared unrealized gain percent for drawdown chart (only when date filter is NOT enabled)
                 const unrealizedGainPercent = dateFilterEnabled ? 0 : sharedUnrealizedGainPercent;
 
-                let aggregatedData = [], labels = [];
+                let aggregatedData = [], labels = [], aggKeys = [];
                 if (activePeriodMode === 'trade') {
                     labels = effectiveList.map((item, i) => `${i + 1}`);
+                    aggKeys = effectiveList.map((item, i) => `${i + 1}`);
                     aggregatedData = effectiveList.map((item, i) => ({ 
                         balance: item.balance, 
                         gainPercent: i === 0 ? 0 : item.gainPercent
@@ -3757,7 +4057,7 @@
                             };
                         }
                     });
-                    Object.keys(dailyMap).sort().forEach(date => { labels.push(date); aggregatedData.push(dailyMap[date]); });
+                    Object.keys(dailyMap).sort().forEach(date => { labels.push(date); aggKeys.push(date); aggregatedData.push(dailyMap[date]); });
                 } else if (activePeriodMode === 'monthly') {
                     const monthlyMap = {};
                     let isFirstMonthly = true;
@@ -3774,7 +4074,7 @@
                             };
                         }
                     });
-                    Object.keys(monthlyMap).sort().forEach(key => { const [y,m] = key.split('-'); labels.push(`${new Date(y,m-1).toLocaleString('default',{month:'short'})} ${y}`); aggregatedData.push(monthlyMap[key]); });
+                    Object.keys(monthlyMap).sort().forEach(key => { const [y,m] = key.split('-'); labels.push(`${new Date(y,m-1).toLocaleString('default',{month:'short'})} ${y}`); aggKeys.push(key); aggregatedData.push(monthlyMap[key]); });
                 } else if (activePeriodMode === 'yearly') {
                     const yearlyMap = {};
                     let isFirstYearly = true;
@@ -3791,7 +4091,7 @@
                             };
                         }
                     });
-                    Object.keys(yearlyMap).sort().forEach(year => { labels.push(year); aggregatedData.push(yearlyMap[year]); });
+                    Object.keys(yearlyMap).sort().forEach(year => { labels.push(year); aggKeys.push(year); aggregatedData.push(yearlyMap[year]); });
                 }
 
                 // Strip unrealized from the closed-trades line (it was baked in — rebuild without it)
@@ -3800,6 +4100,29 @@
 
                 const datasetValues = activeChartType === 'gain' ? aggregatedData.map(item => parseFloat(item.gainPercent.toFixed(2))) : aggregatedData.map(item => parseFloat(item.balance.toFixed(2)));
                 const labelString = activeChartType === 'gain' ? 'TWR Return Gain %' : 'Account Balance $';
+
+                // S&P 500 overlay — aligned to the same period keys, normalized to the
+                // first visible point (0% in gain mode, first balance in balance mode)
+                let spxValues = null;
+                if (activePeriodMode !== 'trade') {
+                    ensureSPXHistory();
+                    if (spxHistory) {
+                        const lookup = activePeriodMode === 'daily' ? spxHistory.byDay
+                                    : activePeriodMode === 'monthly' ? spxHistory.byMonth
+                                    : spxHistory.byYear;
+                        const closes = aggKeys.map(k => lookup[k] ?? null);
+                        const firstIdx = closes.findIndex(c => c !== null);
+                        if (firstIdx >= 0) {
+                            const baseClose = closes[firstIdx];
+                            const baseValue = activeChartType === 'gain' ? 0 : aggregatedData[firstIdx].balance;
+                            spxValues = closes.map((c, i) => {
+                                if (c === null) return i < firstIdx ? baseValue : null;
+                                const ratio = c / baseClose;
+                                return parseFloat((activeChartType === 'gain' ? (ratio - 1) * 100 : baseValue * ratio).toFixed(2));
+                            });
+                        }
+                    }
+                }
 
                 // Calculate highest and lowest gain percentages for display
                 let highestGain = 0, lowestGain = 0;
@@ -3849,6 +4172,13 @@
                             },
                             pointHoverRadius: 6, pointHitRadius: 10
                         },
+                        // S&P 500 benchmark overlay (DLY/MTH/YR periods only)
+                        ...(spxValues ? [{
+                            label: 'S&P 500', data: spxValues,
+                            borderColor: '#FFB000', borderWidth: 2,
+                            pointRadius: 0, pointHoverRadius: 6, pointHitRadius: 20,
+                            fill: false, tension: 0.1, spanGaps: true
+                        }] : []),
                         // Horizontal dashed lines for highest and lowest gain (only in gain mode)
                         ...(activeChartType === 'gain' && datasetValues.length > 0 ? [
                             { data: Array(datasetValues.length).fill(highestGain), borderColor:'#00C853', borderWidth:1, borderDash:[5,5], pointRadius:0, fill:false },
@@ -3892,7 +4222,9 @@
                             }
                         } : false,
                         plugins: { legend: { display:false }, tooltip: { backgroundColor:'#09090b', titleColor:'#71717a', bodyColor:'#f8fafc', borderColor:'#27272a', borderWidth:1, padding:10, displayColors:false,
-                            callbacks: { title: (c) => c[0].label.replace('#', ''), label: (c) => activeChartType === 'gain' ? `Gain: ${c.raw}%` : `Balance: $${c.raw.toLocaleString(undefined,{minimumFractionDigits:2})}` } } },
+                            callbacks: { title: (c) => c[0].label.replace('#', ''), label: (c) => c.dataset.label === 'S&P 500'
+                                ? `S&P 500: ${activeChartType === 'gain' ? c.raw + '%' : '$' + c.raw.toLocaleString(undefined,{maximumFractionDigits:0})}`
+                                : (activeChartType === 'gain' ? `Gain: ${c.raw}%` : `Balance: $${c.raw.toLocaleString(undefined,{minimumFractionDigits:2})}`) } } },
                         scales: {
                             x: { grid:{ color:'#383838', drawTicks:false }, ticks:{ color:'#858585', font:{size:10, family:'monospace'}, maxTicksLimit:8 } },
                             y: { grid:{ color:'#383838', drawTicks:false }, ticks:{ color:'#858585', font:{size:10, family:'monospace'}, callback: v => activeChartType === 'gain' ? v + '%' : '$' + v.toLocaleString() } }
@@ -5112,8 +5444,7 @@
                     const totalSwap = tradeList.reduce((sum, item) => sum + (item.swap || 0), 0);
                     const winRate = pdfTotalTrades > 0 ? (pdfWinningTrades / pdfTotalTrades * 100).toFixed(2) : 0;
 
-                    // Calculate Sharpe Ratio
-                    const ANNUAL_RISK_FREE_RATE = 2.0; // 2% annual risk-free rate
+                    // Calculate Sharpe Ratio (uses live US10Y risk-free rate)
                     const tradeReturns = tradeList.filter(item => item.tradeReturnPercent !== undefined).map(item => item.tradeReturnPercent / 100);
                     let sharpeRatio = 0;
                     if (tradeReturns.length > 1) {
