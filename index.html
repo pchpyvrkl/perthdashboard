@@ -1189,15 +1189,16 @@
             // ============================================================
             const YAHOO_CHART_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
             const MACRO_FETCHERS = [
-                // 1) Direct — Yahoo chart API sends Access-Control-Allow-Origin: *
+                // 1-2) Direct — Yahoo chart API sends Access-Control-Allow-Origin: *
+                //      (two hostnames in case one is blocked by DNS/adblock/CSP)
+                (url) => fetch(url.replace('query1.', 'query2.'), { headers: { 'Accept': 'application/json' } }),
                 (url) => fetch(url, { headers: { 'Accept': 'application/json' } }),
-                // 2) CORS proxies as fallback
+                // 3) CORS proxies as fallback
                 ...[
-                    'https://corsproxy.io/?',
+                    'https://corsproxy.io/?url=',
                     'https://api.allorigins.win/raw?url=',
                     'https://api.codetabs.com/v1/proxy?quest=',
-                    'https://api.allorigins.win/get?url=',
-                    'https://cors-anywhere.herokuapp.com/'
+                    'https://api.allorigins.win/get?url='
                 ].map((proxy) => (url) => fetch(proxy + encodeURIComponent(url), { headers: { 'Accept': 'application/json' } }))
             ];
 
