@@ -109,6 +109,7 @@
             .val-neutral { color:#858585; }
 
             /* Scrolling markets ticker (JS-driven for exact wrap) */
+            #ticker-bar { max-width: 100%; overflow: hidden; }
             #ticker-track { display: flex; width: max-content; will-change: transform; }
 
             .chart-label {
@@ -549,7 +550,7 @@
             <div id="metrics-section" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1 border-b border-terminalBorder pb-2">
                 <div id="ticker-bar" class="flex items-center gap-5 text-[10px] font-mono whitespace-nowrap border-b border-terminalBorder pb-1 mb-1" style="flex-basis:100%;">
                     <span class="text-terminalMuted uppercase tracking-widest font-bold shrink-0">MARKETS:</span>
-                    <div class="flex-1 overflow-hidden"><div id="ticker-track"></div></div>
+                    <div class="flex-1 overflow-hidden min-w-0"><div id="ticker-track"></div></div>
                 </div>
                 <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
                     <p class="metric-label">GAIN (TWR)</p>
