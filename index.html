@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+    <html lang="en" class="dark">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+        <title>ROWRIC Live Portfolio Auditor</title>
+        <!-- Add to Home Screen: standalone app feel on iOS/Android -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="ROWRIC">
+        <meta name="theme-color" content="#000000">
+        <link rel="apple-touch-icon" href="Symbol Logo.png,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">
+        <link rel="icon" href="Symbol Logo.png,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">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="assets/js/config/tailwind.config.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="assets/css/styles.css">
+    <body class="bg-terminalBlack text-terminalText font-mono min-h-screen" style="margin:0; padding:0;">
+        <!-- PIN LOCK SCREEN / WELCOME COVER -->
+        <div id="pin-overlay">
+
+            <!-- Background grid lines (decorative) -->
+            <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;"></div>
+
+            <!-- Radial glow centre -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,0.06) 0%,transparent 70%);pointer-events:none;border-radius:9999px;"></div>
+
+            <!-- PHONE layout: side-by-side branding + keypad -->
+            <!-- TABLET/PC layout: stacked branding above keypad -->
+            <div id="pin-inner" style="position:relative;z-index:1;width:100%;max-width:800px;padding:24px;display:flex;flex-direction:column;align-items:center;">
+
+                <!-- Branding -->
+                <div id="pin-brand" style="text-align:center;margin-bottom:32px;">
+                    <p style="font-size:8px;text-transform:uppercase;letter-spacing:.55em;color:#3f3f46;font-weight:900;margin-bottom:10px;">Quantitative Portfolio Auditor</p>
+                    <h1 style="font-size:clamp(2.4rem,8vw,4.5rem);font-weight:900;letter-spacing:-.05em;color:#f4f4f5;line-height:.95;margin:0;">ROWRIC</h1>
+                    <div style="width:40px;height:2px;background:linear-gradient(90deg,transparent,#FFB000,transparent);margin:12px auto 0;"></div>
+                    <p style="font-size:8px;text-transform:uppercase;letter-spacing:.35em;color:#52525b;margin-top:10px;">Live Portfolio Auditor</p>
+                </div>
+
+                <!-- Dots + keypad wrapper — responsive via CSS class -->
+                <div id="pin-keypad-wrap" style="display:flex;flex-direction:column;align-items:center;gap:24px;">
+
+                    <!-- Dots row -->
+                    <div id="pin-dots" style="display:flex;gap:14px;align-items:center;">
+                        <div class="pin-dot" id="d0"></div>
+                        <div class="pin-dot" id="d1"></div>
+                        <div class="pin-dot" id="d2"></div>
+                        <div class="pin-dot" id="d3"></div>
+                        <div class="pin-dot" id="d4"></div>
+                        <div class="pin-dot" id="d5"></div>
+                    </div>
+
+                    <!-- Standard 3×4 grid keypad (shown on tablet/pc, hidden on phone via JS) -->
+                    <div id="pin-grid" style="display:grid;grid-template-columns:repeat(3,72px);gap:10px;">
+                        <button class="pin-key" onclick="pinPress('1')">1</button>
+                        <button class="pin-key" onclick="pinPress('2')">2</button>
+                        <button class="pin-key" onclick="pinPress('3')">3</button>
+                        <button class="pin-key" onclick="pinPress('4')">4</button>
+                        <button class="pin-key" onclick="pinPress('5')">5</button>
+                        <button class="pin-key" onclick="pinPress('6')">6</button>
+                        <button class="pin-key" onclick="pinPress('7')">7</button>
+                        <button class="pin-key" onclick="pinPress('8')">8</button>
+                        <button class="pin-key" onclick="pinPress('9')">9</button>
+                        <div></div>
+                        <button class="pin-key" onclick="pinPress('0')">0</button>
+                        <button class="pin-key del" onclick="pinDel()">⌫</button>
+                    </div>
+
+                    <!-- Vertical single-column keypad (shown on phone only, hidden on tablet/pc via JS) -->
+                    <div id="pin-vertical" style="display:none;grid-template-columns:repeat(3,58px);gap:8px;justify-content:center;">
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('1')">1</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('2')">2</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('3')">3</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('4')">4</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('5')">5</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('6')">6</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('7')">7</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('8')">8</button>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('9')">9</button>
+                        <div></div>
+                        <button class="pin-key" style="width:58px;height:52px;font-size:1.1rem;" onclick="pinPress('0')">0</button>
+                        <button class="pin-key del" style="width:58px;height:52px;font-size:.85rem;" onclick="pinDel()">⌫</button>
+                    </div>
+
+                    <!-- Privacy Mode Toggle -->
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+                        <input type="checkbox" id="privacy-mode-toggle" style="cursor:pointer;">
+                        <label for="privacy-mode-toggle" style="font-size:9px;text-transform:uppercase;letter-spacing:.3em;color:#52525b;cursor:pointer;">Hide Financial Values</label>
+                    </div>
+
+                </div>
+
+                <p id="pin-hint" style="font-size:8px;text-transform:uppercase;letter-spacing:.25em;color:#3f3f46;height:12px;margin-top:20px;"></p>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">LOADING PORTFOLIO DATA...</p>
+            <div class="loading-bar" style="width: 200px;">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+                <p style="font-size:8px;color:#27272a;text-transform:uppercase;letter-spacing:.2em;margin-top:24px;">© ROWRIC · Secured Access</p>
+            </div>
+        </div>
+
+        <div id="table-tooltip"></div>
+        <div id="pl-tooltip"></div>
+
+        <main id="main-content" class="max-w-7xl mx-auto px-3 py-6 sm:px-4 sm:py-12 space-y-4 sm:space-y-6" style="display: none; overflow-y: auto; height: 100vh;">
+
+            <!-- Terminal Header -->
+            <div class="bg-terminalDark border-b border-terminalBorder p-2 flex flex-col gap-1">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <p class="text-xs font-bold uppercase tracking-widest text-terminalAmber">ROWRIC QUANTITATIVE PORTFOLIO AUDITOR</p>
+                        <span class="text-[10px] text-terminalMuted">|</span>
+                        <p id="user-greeting" class="text-xs uppercase tracking-wider text-terminalText">Good Morning, PONGSAKORN!</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-[10px] text-terminalMuted">
+                        <button onclick="toggleFullscreen()" class="text-terminalAmber hover:text-terminalText transition-colors" title="Toggle Fullscreen">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                        <span id="bangkok-icon" class="text-terminalAmber text-[14px]">☼</span>
+                        <span id="bangkok-text">BKK: --:-- (UTC+7)</span>
+                        <span id="bangkok-date" class="text-terminalMuted">--</span>
+                        <span class="text-terminalAmber">●</span>
+                        <span>LIVE DATA</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center border-t border-terminalBorder pt-1">
+                    <div class="flex items-center gap-6 text-[10px]">
+                        <span class="text-terminalMuted">MARKETS:</span>
+                        <span class="text-terminalText"><span id="ny-clock">--:--</span> <span class="text-terminalMuted">NY</span></span>
+                        <span class="text-terminalText"><span id="london-clock">--:--</span> <span class="text-terminalMuted">LDN</span></span>
+                        <span class="text-terminalText"><span id="sydney-clock">--:--</span> <span class="text-terminalMuted">SYD</span></span>
+                        <span class="text-terminalText"><span id="tokyo-clock">--:--</span> <span class="text-terminalMuted">TKY</span></span>
+                    </div>
+                    <div class="text-[10px] text-terminalMuted uppercase tracking-wider">
+                        SESSION: <span class="text-terminalAmber">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Navigation & Date Filter -->
+            <div class="bg-terminalDark border-b border-terminalBorder p-2">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div class="flex items-center gap-1 text-[10px] uppercase tracking-wider">
+                        <span class="text-terminalAmber font-bold">CMD:</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="clearDateFilter()">OVERVIEW</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="scrollToTransactions()">PORTFOLIO</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="scrollToRisk()">RISK</span>
+                        <span class="text-terminalMuted">|</span>
+                        <span class="text-terminalMuted cursor-pointer hover:text-terminalText transition-colors" onclick="scrollToSimulation()">SIMULATION</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px]">
+                        <span class="text-terminalMuted uppercase">DATE RANGE:</span>
+                        <input type="text" id="date-from" placeholder="dd.mm.yyyy" class="bg-terminalBlack border border-terminalBorder px-2 py-1 text-terminalText focus:outline-none focus:border-terminalAmber w-24 font-mono">
+                        <span class="text-terminalMuted">-</span>
+                        <input type="text" id="date-to" placeholder="dd.mm.yyyy" class="bg-terminalBlack border border-terminalBorder px-2 py-1 text-terminalText focus:outline-none focus:border-terminalAmber w-24 font-mono">
+                        <button onclick="applyDateFilter()" class="px-2 py-1 text-[10px] font-bold uppercase bg-terminalBlack border border-terminalBorder text-terminalAmber hover:border-terminalText hover:text-terminalText transition-all">APPLY</button>
+                        <button onclick="clearDateFilter()" class="px-2 py-1 text-[10px] font-bold uppercase bg-terminalBlack border border-terminalBorder text-terminalMuted hover:border-terminalText hover:text-terminalText transition-all">CLEAR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="capture-area" class="space-y-6">
+
+            <!-- Top Metric Cards -->
+            <div id="metrics-section" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1 border-b border-terminalBorder pb-2">
+                <div id="ticker-bar" class="flex items-center gap-5 text-[10px] font-mono whitespace-nowrap border-b border-terminalBorder pb-1 mb-1" style="flex-basis:100%;">
+                    <span class="text-terminalMuted uppercase tracking-widest font-bold shrink-0">MARKETS:</span>
+                    <div class="flex-1 overflow-hidden min-w-0"><div id="ticker-track"></div></div>
+                </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">GAIN (TWR)</p>
+                    <p id="metric-twr-gain" class="metric-value val-pos">--%</p>
+                </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <div class="flex items-center justify-between w-full">
+                        <p class="metric-label">NET PROFIT</p>
+                        <button onclick="toggleFinancialPrivacy()" class="text-terminalMuted hover:text-terminalText transition-colors" title="Toggle visibility">
+                            <i id="privacy-eye-icon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                    <p id="metric-net-profit" class="metric-value val-neutral">$--</p>
+                    <p id="metric-roi" class="hidden"></p>
+                </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <div class="flex items-center justify-between w-full">
+                        <p class="metric-label">BALANCE</p>
+                    </div>
+                    <p id="metric-balance" class="metric-value val-neutral">$--</p>
+                    <p id="metric-deposits" class="hidden"></p>
+                </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">MAX DRAWDOWN</p>
+                    <p id="metric-max-drawdown" class="metric-value val-neg">--%</p>
+                </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">CURRENT DD</p>
+                    <p id="metric-current-drawdown" class="metric-value val-neg">--%</p>
+                </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <div class="flex items-center gap-2">
+                        <p class="metric-label" style="margin-bottom:0">UNREALIZED P/L</p>
+                        <span class="flex h-1.5 w-1.5 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminalGreen opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-terminalGreen"></span>
+                        </span>
+                    </div>
+                    <p id="metric-unrealized-pl" class="metric-value val-neutral">$--</p>
+                </div>
+                <div class="metric-card flex flex-col items-start justify-center gap-1 min-h-[70px]">
+                    <p class="metric-label">S&amp;P 500 RETURN</p>
+                    <p id="metric-spx-return" class="metric-value val-neutral">--%</p>
+                </div>
+            </div>
+
+            <!-- Main Chart & Sidebar Analytics (toggles between Equity Chart and US News) -->
+            <div id="chart-section" class="grid grid-cols-1 gap-4">
+                <div class="bg-terminalDark border border-terminalBorder p-3 flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+                        <div>
+                            <h4 id="main-view-title" class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">EQUITY CURVE & PORTFOLIO GAIN</h4>
+                        </div>
+                        <div class="flex gap-1 flex-wrap">
+                            <div class="flex gap-1 bg-terminalBlack p-1 border border-terminalBorder">
+                                <button onclick="switchMainView('chart')" id="btn-view-chart" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber">CHART</button>
+                                <button onclick="switchMainView('news')" id="btn-view-news" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">NEWS</button>
+                            </div>
+                            <div id="chart-mode-controls" class="flex gap-1 flex-wrap">
+                                <div class="flex gap-1 bg-terminalBlack p-1 border border-terminalBorder">
+                                    <button onclick="changeChartType('gain')" id="btn-chart-gain" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalAmber text-terminalBlack">GAIN %</button>
+                                    <button onclick="changeChartType('balance')" id="btn-chart-balance" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">BAL $</button>
+                                </div>
+                                <div class="flex gap-1 bg-terminalBlack p-1 border border-terminalBorder">
+                                    <button onclick="changePeriodMode('trade')" id="btn-period-trade" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">TRD</button>
+                                    <button onclick="changePeriodMode('daily')" id="btn-period-daily" class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber">DLY</button>
+                                    <button onclick="changePeriodMode('monthly')" id="btn-period-monthly" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">MTH</button>
+                                    <button onclick="changePeriodMode('yearly')" id="btn-period-yearly" class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText">YR</button>
+                                </div>
+                            </div>
+                            <span id="news-updated-at" class="hidden text-[9px] text-terminalMuted uppercase tracking-widest self-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Chart view -->
+                    <div id="main-chart-view">
+                        <div class="relative w-full h-[220px] sm:h-[300px] bg-terminalBlack border border-terminalBorder">
+                            <canvas id="equityChart"></canvas>
+                            <div id="equity-live-dot">
+                                <span id="equity-live-dot-ping"></span>
+                                <span id="equity-live-dot-core"></span>
+                            </div>
+                            <div id="highest-gain-label" class="chart-label text-terminalGreen" style="display: none;">--%</div>
+                            <div id="lowest-gain-label" class="chart-label text-terminalRed" style="display: none;">--%</div>
+                        </div>
+                        <div class="relative w-full h-[120px] sm:h-[140px] mt-2">
+                            <p class="text-[9px] font-black uppercase text-terminalMuted tracking-widest mb-1">UNDERWATER RETURN PROFILE (%)</p>
+                            <div class="relative bg-terminalBlack border border-terminalBorder" style="height: 100%;">
+                                <canvas id="drawdownChart" style="height: 100%;"></canvas>
+                                <div id="max-drawdown-label" class="chart-label text-terminalRed" style="display: none;">--%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- US News view (hidden until toggled) -->
+                    <div id="main-news-view" class="hidden">
+                        <p class="text-[9px] text-terminalMuted uppercase tracking-widest mb-3">Source: ForexFactory Weekly Calendar &middot; High Impact USD events only &middot; times shown 24hr UTC+7 &middot; auto-refreshes every 5 min</p>
+                        <div id="news-calendar-list" class="space-y-2 h-[300px] sm:h-[400px] overflow-y-auto pr-1">
+                            <div class="text-center py-8 text-terminalMuted text-xs">Loading economic calendar…</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Open Trades -->
+            <div id="open-trades-section" class="bg-terminalDark border border-terminalBorder p-3 flex flex-col" style="overflow:hidden;">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">OPEN POSITIONS (UNREALIZED)</h4>
+                    <span id="open-trades-count" class="text-[10px] text-terminalAmber border border-terminalAmber px-2 py-0.5">0 ACTIVE</span>
+                </div>
+                <div class="overflow-x-auto border border-terminalBorder flex-1 max-h-[300px]" style="-webkit-overflow-scrolling:touch;">
+                    <table class="open-trades-table w-full text-xs text-left text-terminalText">
+                        <thead class="text-terminalMuted uppercase bg-terminalBlack sticky top-0 border-b border-terminalBorder">
+                            <tr>
+                                <th class="px-4 py-2.5 col-open-time">OPEN TIME</th>
+                                <th class="px-4 py-2.5 col-symbol">SYMBOL</th>
+                                <th class="px-4 py-2.5 col-type">TYPE</th>
+                                <th class="px-4 py-2.5 text-right col-volume">VOL</th>
+                                <th class="px-4 py-2.5 text-right col-open-price">OPEN</th>
+                                <th class="px-4 py-2.5 text-right col-tp">TP</th>
+                                <th class="px-4 py-2.5 text-right col-sl">SL</th>
+                                <th class="px-4 py-2.5 text-right col-current-price">CURR</th>
+                                <th class="px-4 py-2.5 text-right col-gain">GAIN %</th>
+                                <th class="px-4 py-2.5 text-right col-commission">COM</th>
+                                <th class="px-4 py-2.5 text-right col-swap">SWAP</th>
+                                <th class="px-4 py-2.5 text-right col-profit">PROFIT</th>
+                                <th class="px-4 py-2.5 text-right col-holding">HOLDING</th>
+                            </tr>
+                        </thead>
+                        <tbody id="open-transaction-rows" class="divide-y divide-terminalBorder">
+                            <tr><td colspan="13" class="text-center py-8 text-terminalMuted">CONNECTING TO LIVE FEED (SHEET 2)...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Transaction Log -->
+            <div id="transactions-section" class="bg-terminalDark border border-terminalBorder p-4 flex flex-col">
+                <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
+                    <h4 class="text-[10px] font-black uppercase text-terminalMuted tracking-widest">DETAILED TRANSACTIONS HISTORY (BY CLOSE DATE)</h4>
+                    <div class="flex items-center gap-2">
+                        <span id="history-count" class="text-[10px] text-terminalText border border-terminalBorder px-2 py-0.5">0 ENTRIES</span>
+                        <button onclick="exportTransactionsPDF()" class="flex items-center gap-1.5 px-3 py-1.5 bg-terminalBlack border border-terminalBorder text-[10px] uppercase tracking-widest font-black text-terminalMuted hover:text-terminalText transition-all">
+                            <i class="fa-solid fa-file-arrow-down text-[9px]"></i> EXPORT PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Income Statement Summary -->
+                <div class="bg-terminalBlack border border-terminalBorder p-3 mb-3">
+                    <h5 class="text-[9px] font-black uppercase text-terminalAmber tracking-widest mb-2">INCOME STATEMENT SUMMARY</h5>
+                    <div class="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-12 gap-x-4 gap-y-1 text-[10px]">
+                        <div>
+                            <span class="text-terminalMuted uppercase">Trades:</span>
+                            <span id="income-total-trades" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Long:</span>
+                            <span id="income-long-trades" class="text-terminalGreen font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Short:</span>
+                            <span id="income-short-trades" class="text-terminalRed font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Volume:</span>
+                            <span id="income-total-volume" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Deposits:</span>
+                            <span id="income-deposits" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Withdrawals:</span>
+                            <span id="income-withdrawals" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Gains:</span>
+                            <span id="income-total-gains" class="text-terminalGreen font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Losses:</span>
+                            <span id="income-total-losses" class="text-terminalRed font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Net Profit:</span>
+                            <span id="income-net-profit" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Avg % Gain:</span>
+                            <span id="income-avg-gain" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Win Rate:</span>
+                            <span id="income-win-rate" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                        <div>
+                            <span class="text-terminalMuted uppercase">Profit Factor:</span>
+                            <span id="income-profit-factor" class="text-terminalText font-bold ml-1">—</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto border border-terminalBorder flex-1 max-h-[300px]">
+                    <table class="w-full text-xs text-left text-terminalText">
+                        <thead class="text-terminalMuted uppercase bg-terminalBlack sticky top-0 border-b border-terminalBorder">
+                            <tr>
+                                <th class="px-4 py-2.5 text-left">IN TIME</th>
+                                <th class="px-4 py-2.5 text-left">OUT TIME</th>
+                                <th class="px-4 py-2.5 text-left">SYMBOL</th>
+                                <th class="px-2 py-2.5">TYPE</th>
+                                <th class="px-2 py-2.5 text-right">VOL</th>
+                                <th class="px-4 py-2.5 text-right">IN PRICE</th>
+                                <th class="px-4 py-2.5 text-right">OUT PRICE</th>
+                                <th class="px-4 py-2.5 text-right">PROFIT</th>
+                                <th class="px-4 py-2.5 text-right">GAIN %</th>
+                                <th class="px-4 py-2.5 text-right">COM</th>
+                                <th class="px-4 py-2.5 text-right">SWAP</th>
+                                <th class="px-4 py-2.5 text-right">MAGIC</th>
+                                <th class="px-4 py-2.5 text-right">HOLDING</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-rows" class="divide-y divide-terminalBorder">
+                            <tr><td colspan="13" class="text-center py-8 text-terminalMuted">AWAITING DATA FETCH...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- P/L Activity Calendar -->
+            <div id="pl-activity-section" class="bg-terminalDark border border-terminalBorder p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <h4 class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em]">P/L Activity Calendar</h4>
+                    <div class="flex items-center gap-2">
+                        <button class="px-2 py-1 text-[10px] font-bold transition-all bg-terminalPanel text-terminalText border border-terminalAmber" id="pl-cal-month-btn" onclick="setPLCalendarTimeframe('month')">Month</button>
+                        <button class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder" id="pl-cal-year-btn" onclick="setPLCalendarTimeframe('year')">Year</button>
+                        <button class="px-2 py-1 text-[10px] font-bold transition-all text-terminalMuted hover:text-terminalText border border-terminalBorder" id="pl-cal-total-btn" onclick="setPLCalendarTimeframe('total')">Total</button>
+                        <select id="pl-cal-year-select" class="px-2 py-1 text-[10px] font-bold bg-terminalBlack text-terminalText border border-terminalBorder cursor-pointer" onchange="selectPLCalendarYear(this.value)">
+                        </select>
+                        <select id="pl-cal-month-select" class="px-2 py-1 text-[10px] font-bold bg-terminalBlack text-terminalText border border-terminalBorder cursor-pointer" onchange="selectPLCalendarMonth(this.value)">
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-1 mb-4">
+                    <div class="metric-card"><p class="metric-label">Total P/L</p><p id="pl-cal-total-pl" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Avg Per Day</p><p id="pl-cal-avg-pl" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Best Day</p><p id="pl-cal-best-day" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Worst Day</p><p id="pl-cal-worst-day" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Active Days</p><p id="pl-cal-active-days" class="metric-value">-</p></div>
+                </div>
+                <div class="activity-calendar-container" id="pl-activity-calendar">
+                    <div class="text-center py-8 text-terminalMuted text-xs">Loading P/L calendar...</div>
+                </div>
+                <div class="flex items-center gap-2 mt-4 text-[9px] text-terminalMuted uppercase tracking-widest">
+                    <span>Losses</span>
+                    <div class="w-3 h-3 bg-terminalRed/30 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed/50 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed/70 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed/85 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalRed rounded-sm"></div>
+                    <span class="mx-2">|</span>
+                    <span>Gains</span>
+                    <div class="w-3 h-3 bg-terminalGreen/30 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen/50 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen/70 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen/85 rounded-sm"></div>
+                    <div class="w-3 h-3 bg-terminalGreen rounded-sm"></div>
+                </div>
+            </div>
+
+            <!-- Institution Risk & Return Analytics -->
+            <div id="institution-section" class="bg-terminalDark border border-terminalBorder p-4">
+                <h4 class="text-[10px] font-black uppercase text-terminalMuted mb-4 tracking-widest">INSTITUTION RISK & RETURN ANALYTICS</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-1">
+                    <div class="metric-card"><p class="metric-label">ANNUALIZED CAGR</p><p id="stat-cagr" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">AVG. MONTHLY GAIN</p><p id="stat-avg-monthly" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">AVG. DAILY GAIN</p><p id="stat-avg-daily" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">ANNUALIZED SHARPE</p><p id="stat-sharpe" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">ANNUALIZED SORTINO</p><p id="stat-sortino" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">MAR / CALMAR</p><p id="stat-calmar" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">SUCCESS PROB.</p><p id="stat-wr2" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">REALIZED VOL (ANN.)</p><p id="stat-vol" class="metric-value">-</p></div>
+                </div>
+            </div>
+
+            <!-- Risk Assessment -->
+            <div id="risk-assessment-section" class="bg-terminalDark border border-terminalBorder p-4">
+                <h4 class="text-[10px] font-black uppercase text-terminalMuted mb-4 tracking-widest">RISK ASSESSMENT</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1">
+                    <div class="metric-card"><p class="metric-label">PARAMETRIC VAR (95%)</p><p id="stat-var" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">PROFIT FACTOR</p><p id="stat-pf" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">RECOVERY FACTOR</p><p id="stat-rec" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">RETURN EXPECTANCY</p><p id="stat-expectancy" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">RISK/REWARD PROFILE</p><p id="stat-rr" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">ALPHA (VS BENCHMARK)</p><p id="stat-alpha" class="metric-value">-</p></div>
+                </div>
+                <div class="flex items-center gap-6 mt-4 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <label class="text-[9px] text-terminalMuted uppercase tracking-widest font-bold whitespace-nowrap">US10Y / RFR %</label>
+                        <span id="rfr-value" class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 text-center font-mono">--</span>
+                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">ANNUAL · LIVE</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-[9px] text-terminalMuted uppercase tracking-widest font-bold whitespace-nowrap">BENCHMARK RETURN % (S&amp;P 500)</label>
+                        <span id="bmk-value" class="w-20 bg-terminalBlack border border-terminalBorder text-terminalAmber text-xs font-bold px-2 py-1 text-center font-mono">--</span>
+                        <span class="text-[9px] text-terminalMuted uppercase tracking-widest">TRAILING 1Y · LIVE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holding Period Distribution -->
+            <div id="holding-section" class="bg-terminalDark border border-terminalBorder p-4">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Holding Period Distribution</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 items-center">
+                    <div class="h-[220px] sm:h-[320px] relative"><canvas id="durationChart"></canvas></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="metric-card"><p class="metric-label">Avg Holding</p><p id="dur-avg" class="metric-value">-</p></div>
+                        <div class="metric-card"><p class="metric-label">Max Holding</p><p id="dur-max" class="metric-value">-</p></div>
+                        <div class="metric-card"><p class="metric-label">Min Holding</p><p id="dur-min" class="metric-value">-</p></div>
+                        <div class="metric-card"><p class="metric-label">Tail Risk Duration</p><p id="dur-p5" class="metric-value">-</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temporal Attribution -->
+            <div id="temporal-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+                    <h4 class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em]">Temporal Return Attribution</h4>
+                    <p class="text-[10px] text-terminalMuted uppercase tracking-widest">Basis: Close Timestamp (Local Sheet Time)</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="bg-zinc-900/30 p-3 sm:p-4  border border-terminalBorder/60 h-[240px] sm:h-[280px]">
+                        <p class="metric-label mb-2">Intraday Periodicity (Cum. %)</p>
+                        <div class="h-[170px] sm:h-[220px] relative"><canvas id="hourlyChart"></canvas></div>
+                    </div>
+                    <div class="bg-zinc-900/30 p-3 sm:p-4  border border-terminalBorder/60 h-[240px] sm:h-[280px]">
+                        <p class="metric-label mb-2">Day-of-Week Periodicity (Cum. %)</p>
+                        <div class="h-[170px] sm:h-[220px] relative"><canvas id="dailyPatternChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Factor Attribution -->
+            <div id="factor-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Factor Type Attribution (Long / Short)</h4>
+                <div id="distribution-stats" class="flex justify-between items-end mb-4 sm:mb-6"></div>
+                <div class="h-[28px] relative w-full mb-8"><canvas id="attributionPieChart"></canvas></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-terminalBorder">
+                                <th class="py-3 text-left text-terminalMuted uppercase tracking-widest font-black">Direction</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Exposure</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Profit Factor</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Success Rate</th>
+                                <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">Expected Return</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attribution-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Risk of Ruin -->
+            <div id="risk-ruin-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6  overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Probability of Capital Depletion</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-terminalBorder text-center">
+                                    <th class="py-3 text-left text-terminalMuted uppercase tracking-widest font-black">Capital Loss</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">10%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">20%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">30%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">40%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">50%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">60%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">70%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">80%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">90%</th>
+                                    <th class="py-3 text-right text-terminalMuted uppercase tracking-widest font-black">100%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-4 text-left font-black tracking-widest text-zinc-300 uppercase">Probability</td>
+                                    <td id="ror-10" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-20" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-30" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-40" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-50" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-60" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-70" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-80" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-90" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                    <td id="ror-100" class="py-4 text-center font-medium text-zinc-400">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="bg-zinc-900/30 p-4  border border-terminalBorder/60">
+                        <p class="text-[10px] font-black uppercase text-terminalMuted tracking-[0.3em] mb-4">Drawdown Probability Distribution</p>
+                        <div class="h-[200px] sm:h-[240px] w-full relative"><canvas id="drawdownDistributionChart"></canvas></div>
+                        <div class="flex justify-between mt-3 text-[9px] text-terminalMuted uppercase tracking-widest">
+                            <span>Drag cursor to see probability</span>
+                            <span id="dd-cursor-value">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monte Carlo -->
+            <div id="monte-carlo-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+                    <h4 class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em">Monte Carlo Simulation</h4>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="simulation-sims" placeholder="Sims" class="bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] px-3 py-1.5 w-20 focus:outline-none focus:border-terminalAmber" value="10000">
+                        <button onclick="runSimulation()" class="px-3 py-1.5 bg-terminalAmber text-terminalBlack text-[10px] uppercase tracking-widest font-black hover:bg-terminalText hover:text-terminalAmber transition-all">Simulate</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <div class="metric-card bg-white/[0.02] border-white/10"><p class="metric-label">Sims / Sample Size</p><div class="flex items-baseline gap-2"><p id="mc-sim-count" class="text-xl font-light">-</p><span class="text-terminalMuted text-xs">/</span><p id="mc-trade-count" class="text-xl font-light">-</p></div></div>
+                    <div class="metric-card"><p class="metric-label">Median Final Return</p><p id="mc-median-ret" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Best Case (95%)</p><p id="mc-best-case" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Outcome Variance Factor</p><p id="mc-range" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">5% Profit Floor</p><p id="mc-tail-outcome" class="metric-value text-emerald-500">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Capital Risk (Principal)</p><p id="mc-worst-ret" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Prob. of Profit</p><p id="mc-prob-profit" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Robustness Score</p><p id="mc-robust-score" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Median Max DD</p><p id="mc-median-dd" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Worst Max DD (95%)</p><p id="mc-worst-dd" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Stagnation (Median/P95)</p><p id="mc-stagnation" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Bankruptcy Risk</p><p id="mc-ruin" class="metric-value">-</p></div>
+                </div>
+                <div class="mt-6 bg-zinc-900/30 p-4  border border-terminalBorder/60">
+                    <p class="text-[10px] font-black uppercase text-terminalMuted tracking-[0.3em] mb-4">Monte Carlo Path Distribution (Percentile Projections)</p>
+                    <div class="h-[200px] sm:h-[280px] w-full relative"><canvas id="mcChart"></canvas></div>
+                </div>
+            </div>
+
+
+            <!-- Monthly Heatmap -->
+            <div id="monthly-heatmap-section" class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Monthly Return Sheet (%)</h4>
+                <div class="overflow-x-auto">
+                    <table class="monthly-table border-collapse border border-zinc-900">
+                        <thead>
+                            <tr>
+                                <th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
+                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-terminalMuted">Annual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthly-heatmap-body">
+                            <tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting cycles...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Max Drawdown Heatmap -->
+            <div id="drawdown-heatmap-section" class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-2 tracking-[0.3em]">Max Drawdown Heatmap (%)</h4>
+                <p class="text-[10px] text-terminalMuted uppercase tracking-widest mb-6">Deepest peak-to-valley drawdown reached during each period (High-Water Mark basis)</p>
+                <div class="overflow-x-auto">
+                    <table class="monthly-table border-collapse border border-zinc-900">
+                        <thead>
+                            <tr>
+                                <th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
+                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-terminalMuted">Max DD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drawdown-heatmap-body">
+                            <tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting cycles...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Notional Exposure Matrix -->
+            <div id="notional-section" class="bg-terminalDark border border-terminalBorder  p-6  flex flex-col overflow-hidden">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Notional Exposure Matrix (Lots)</h4>
+                <div class="overflow-x-auto">
+                    <table class="monthly-table border-collapse border border-zinc-900">
+                        <thead>
+                            <tr>
+                                <th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
+                                <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="text-terminalMuted">Total Lots</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lots-monthly-body">
+                            <tr><td colspan="14" class="text-center py-8 text-terminalMuted italic border-none">Awaiting cycles...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Commission Rebate Audit -->
+            <div id="rebate-section" class="bg-terminalDark border border-terminalBorder  p-4 sm:p-6 ">
+                <h4 class="text-xs font-black uppercase text-terminalMuted mb-6 tracking-[0.3em]">Commission Rebate Audit</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="metric-card"><p class="metric-label">Total Cumulative Lots</p><p id="stat-total-lots" class="metric-value">-</p></div>
+                    <div class="metric-card"><p class="metric-label">Est. Rebate ($7/Lot)</p><p id="stat-total-rebate" class="metric-value">-</p></div>
+                </div>
+            </div>
+
+
+            </div><!-- /capture-area -->
+
+            <!-- Monthly Report Generator -->
+            <div id="report-generator-section" class="bg-terminalDark border border-terminalBorder p-3">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-file-pdf text-terminalMuted text-sm"></i>
+                        <span class="text-xs font-black uppercase text-terminalMuted tracking-[0.3em]">Monthly Report Generator</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-2 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <label class="text-[10px] text-terminalMuted uppercase tracking-wider">AVAILABLE MONTHS:</label>
+                            <select id="report-month" class="bg-terminalBlack border border-terminalBorder px-2 py-1 text-xs text-terminalText focus:outline-none focus:border-terminalAmber font-mono" style="width: 140px;">
+                                <option value="">Select month...</option>
+                            </select>
+                        </div>
+                        <button onclick="generateMonthlyReport()" class="px-3 py-1 text-xs font-bold transition-all bg-terminalGreen text-terminalBlack hover:bg-terminalRed hover:text-terminalText flex items-center gap-1.5">
+                            <i class="fa-solid fa-download text-[9px]"></i> GENERATE REPORT
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        <div id="export-button-section" class="flex justify-center py-10 gap-4">
+            <button id="exportBtn" onclick="exportPDF()" class="px-6 py-3 sm:px-8 sm:py-4 bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] uppercase tracking-widest font-black hover:border-terminalAmber hover:text-terminalAmber transition-all flex items-center gap-2 sm:gap-3">
+                <i class="fa-solid fa-file-arrow-down text-sm"></i> EXPORT AUDIT PDF
+            </button>
+            <button onclick="showMonthlyReportGenerator()" class="px-6 py-3 sm:px-8 sm:py-4 bg-terminalBlack border border-terminalBorder text-terminalText text-[10px] uppercase tracking-widest font-black hover:border-terminalAmber hover:text-terminalAmber transition-all flex items-center gap-2 sm:gap-3">
+                <i class="fa-solid fa-calendar text-sm"></i> MONTHLY REPORT
+            </button>
+        </div>
+        </main>
+
+        <script src="assets/js/config.js"></script>
+        <script src="assets/js/state.js"></script>
+        <script src="assets/js/market-data.js"></script>
+        <script src="assets/js/auth.js"></script>
+        <script src="assets/js/bootstrap.js"></script>
+        <script src="assets/js/widgets.js"></script>
+        <script src="assets/js/open-trades.js"></script>
+        <script src="assets/js/data.js"></script>
+        <script src="assets/js/navigation.js"></script>
+        <script src="assets/js/portfolio.js"></script>
+        <script src="assets/js/analytics.js"></script>
+        <script src="assets/js/pl-calendar.js"></script>
+        <script src="assets/js/drawdown.js"></script>
+        <script src="assets/js/history-table.js"></script>
+        <script src="assets/js/charts.js"></script>
+        <script src="assets/js/risk-analytics.js"></script>
+        <script src="assets/js/simulation.js"></script>
+        <script src="assets/js/monthly-report.js"></script>
+        <script src="assets/js/pdf-export.js"></script>
+    </body>
+    </html>    
